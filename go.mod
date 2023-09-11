@@ -2,7 +2,10 @@ module github.com/mr-chelyshkin/rpi4_network_controller
 
 go 1.20
 
-require github.com/gdamore/tcell/v2 v2.6.0
+require (
+	github.com/gdamore/tcell/v2 v2.6.0
+	github.com/rivo/tview v0.0.0-20230909130259-ba6a2a345459
+)
 
 require (
 	github.com/gdamore/encoding v1.0.0 // indirect

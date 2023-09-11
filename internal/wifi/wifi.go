@@ -12,6 +12,51 @@ import (
 	"unsafe"
 )
 
+// Wifi ...
+type Wifi struct{}
+
+// NewWifi ...
+func NewWifi() (Wifi, error) {
+	return Wifi{}, nil
+}
+
+// Scan ...
+func (w *Wifi) Scan() []*network {
+	uniqueMap := make(map[string]struct{})
+	var uniqueRes []*network
+
+	for _, net := range scanCGO() {
+		if C.GoString(&net.sSID[0]) == "" {
+			continue
+		}
+
+		key := C.GoString(&net.sSID[0]) + "_" + fmt.Sprintf("%f", net.freq)
+		if _, found := uniqueMap[key]; !found {
+			uniqueRes = append(uniqueRes, net)
+			uniqueMap[key] = struct{}{}
+		}
+	}
+	sort.Sort(byLevelDesc(uniqueRes))
+	return uniqueRes
+}
+
+// Conn ...
+func (w *Wifi) Conn(ssid, password string) bool {
+	return connCGO(ssid, password)
+}
+
+// Active ...
+func (w *Wifi) Active() string {
+	res := activeCGO()
+
+	switch res {
+	case "":
+		return "No connection"
+	default:
+		return fmt.Sprintf("Current network: %s", res)
+	}
+}
+
 type network struct {
 	sSID    [33]C.char
 	freq    float64
@@ -67,49 +112,4 @@ func activeCGO() string {
 
 func connCGO(ssid, pass string) bool {
 	return C.conn(C.CString(ssid), C.CString(pass)) == 0
-}
-
-// Wifi ...
-type Wifi struct{}
-
-// NewWifi ...
-func NewWifi() (Wifi, error) {
-	return Wifi{}, nil
-}
-
-// Scan ...
-func (w *Wifi) Scan() []*network {
-	uniqueMap := make(map[string]struct{})
-	var uniqueRes []*network
-
-	for _, net := range scanCGO() {
-		if C.GoString(&net.sSID[0]) == "" {
-			continue
-		}
-
-		key := C.GoString(&net.sSID[0]) + "_" + fmt.Sprintf("%f", net.freq)
-		if _, found := uniqueMap[key]; !found {
-			uniqueRes = append(uniqueRes, net)
-			uniqueMap[key] = struct{}{}
-		}
-	}
-	sort.Sort(byLevelDesc(uniqueRes))
-	return uniqueRes
-}
-
-// Conn ...
-func (w *Wifi) Conn(ssid, password string) bool {
-	return connCGO(ssid, password)
-}
-
-// Active ...
-func (w *Wifi) Active() string {
-	res := activeCGO()
-
-	switch res {
-	case "":
-		return "No connection"
-	default:
-		return fmt.Sprintf("Current network: %s", res)
-	}
 }
