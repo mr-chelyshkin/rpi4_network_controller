@@ -1,15 +1,28 @@
 package controller
 
 import (
+	"context"
+
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
 func Run() error {
 	app := tview.NewApplication()
+	var interrupt func()
 
 	main := tview.NewList().
-		AddItem("Connect", "connect to wifi network", '1', func() { cmdConnect(app) }).
+		AddItem(
+			"Connect", "connect to wifi network", '1',
+			func() {
+				if interrupt != nil {
+					interrupt()
+				}
+				ctx, cancel := context.WithCancel(context.Background())
+				interrupt = cancel
+				cmdConnect(ctx, cancel, app)
+			},
+		).
 		AddItem("Disconnect", "interrupt wifi connection", '2', nil)
 	frameMain := frameDefault(main)
 

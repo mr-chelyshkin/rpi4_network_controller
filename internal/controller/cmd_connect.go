@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"time"
 
 	"github.com/mr-chelyshkin/rpi4_network_controller"
@@ -9,16 +10,16 @@ import (
 	"github.com/rivo/tview"
 )
 
-func cmdConnect(app *tview.Application) {
+func cmdConnect(ctx context.Context, cancel context.CancelFunc, app *tview.Application) {
 	networks := tview.NewList()
 	app.SetRoot(frameDefault(networks), true)
 
 	wifiController, err := wifi.NewWifi()
 	if err != nil {
 	}
-	exec(wifiController, networks)
+	exec(ctx, cancel, wifiController, app, networks)
 
-	go func() {
+	go func(ctx context.Context) {
 		ticker := time.NewTicker(rpi4_network_controller.ScanTimeoutSec * time.Second)
 		for {
 			select {
@@ -26,15 +27,17 @@ func cmdConnect(app *tview.Application) {
 				app.QueueUpdateDraw(
 					func() {
 						networks.Clear()
-						exec(wifiController, networks)
+						exec(ctx, cancel, wifiController, app, networks)
 					},
 				)
+			case <-ctx.Done():
+				return
 			}
 		}
-	}()
+	}(ctx)
 }
 
-func exec(wifi wifi.Wifi, list *tview.List) {
+func exec(ctx context.Context, cancel context.CancelFunc, wifi wifi.Wifi, app *tview.Application, list *tview.List) {
 	scanResult := wifi.Scan()
 
 	for _, item := range scanResult {
@@ -42,7 +45,16 @@ func exec(wifi wifi.Wifi, list *tview.List) {
 			item.GetSSID(),
 			item.GetQuality(),
 			1,
-			nil,
+			func() {
+				cancel()
+
+				form := tview.NewForm().
+					AddInputField("SSID", item.GetSSID(), 20, nil, nil).
+					AddPasswordField("Password", "", 20, '*', nil).
+					AddButton("Connect", nil)
+				frameForm := frameDefault(form)
+				app.SetRoot(frameForm, true)
+			},
 		)
 	}
 }
