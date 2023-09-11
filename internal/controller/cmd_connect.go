@@ -19,25 +19,31 @@ func cmdConnect(app *tview.Application) {
 	}
 	go func() {
 		ticker := time.NewTicker(rpi4_network_controller.ScanTimeoutSec * time.Second)
+		exec(wifiController, networks)
+
 		for {
 			select {
 			case <-ticker.C:
 				app.QueueUpdateDraw(
 					func() {
 						networks.Clear()
-
-						scanResult := wifiController.Scan()
-						for _, item := range scanResult {
-							networks.AddItem(
-								item.GetSSID(),
-								item.GetQuality(),
-								1,
-								nil,
-							)
-						}
+						exec(wifiController, networks)
 					},
 				)
 			}
 		}
 	}()
+}
+
+func exec(wifi wifi.Wifi, list *tview.List) {
+	scanResult := wifi.Scan()
+
+	for _, item := range scanResult {
+		list.AddItem(
+			item.GetSSID(),
+			item.GetQuality(),
+			1,
+			nil,
+		)
+	}
 }
