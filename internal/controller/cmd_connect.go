@@ -15,12 +15,11 @@ func cmdConnect(app *tview.Application) {
 
 	wifiController, err := wifi.NewWifi()
 	if err != nil {
-
 	}
+	exec(wifiController, networks)
+
 	go func() {
 		ticker := time.NewTicker(rpi4_network_controller.ScanTimeoutSec * time.Second)
-		exec(wifiController, networks)
-
 		for {
 			select {
 			case <-ticker.C:
