@@ -3,14 +3,26 @@ package wifi
 /*
 #cgo LDFLAGS: -liw
 #include "wifi.h"
+
+extern int custom_write(int, const void*, size_t);
+void redirect_output();
+void reset_output();
 */
 import "C"
+
 import (
 	"fmt"
 	"sort"
 	"strconv"
 	"unsafe"
 )
+
+var outputChan chan string
+
+//export goSendToChannel
+func goSendToChannel(s *C.char) {
+	outputChan <- C.GoString(s)
+}
 
 // Wifi ...
 type Wifi struct{}
@@ -41,8 +53,8 @@ func (w *Wifi) Scan() []*network {
 }
 
 // Conn ...
-func (w *Wifi) Conn(ssid, password string) bool {
-	return connCGO(ssid, password)
+func (w *Wifi) Conn(ssid, password string, output chan string) bool {
+	return connCGO(ssid, password, output)
 }
 
 // Active ...
@@ -110,6 +122,12 @@ func activeCGO() string {
 	return C.GoString(C.active())
 }
 
-func connCGO(ssid, pass string) bool {
-	return C.conn(C.CString(ssid), C.CString(pass)) == 0
+func connCGO(ssid, pass string, output chan string) bool {
+	outputChan = output
+	C.redirect_output()
+	result := C.conn(C.CString(ssid), C.CString(pass)) == 0
+	C.reset_output()
+
+	return result
+	// return C.conn(C.CString(ssid), C.CString(pass)) == 0
 }

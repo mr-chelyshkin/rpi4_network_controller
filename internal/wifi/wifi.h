@@ -17,4 +17,7 @@ wifi_info* scan(int* count);
 const char* active();
 int conn(const char* ssid, const char* password);
 
+void redirect_output(void);
+void reset_output(void);
+
 #endif

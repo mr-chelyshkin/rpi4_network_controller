@@ -4,6 +4,21 @@
 #include <string.h>
 #include <sys/wait.h>
 
+extern void goSendToChannel(const char* s);
+
+int custom_write(int fd, const void* buf, size_t count) {
+  (void) fd;
+
+  char* s = (char*) malloc(sizeof(count + 1));
+  if (s == NULL) return -1;
+
+  memcpy(s, buf, count);
+  s[count] = '\0';
+  goSendToChannel(s);
+  free(s);
+  return count;
+}
+
 int conn(const char* ssid, const char* password) {
     int retval;
 

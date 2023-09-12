@@ -55,6 +55,7 @@ func exec(cancel context.CancelFunc, wifi wifi.Wifi, app *tview.Application, lis
 			cancel()
 
 			stdoutCH := make(chan string)
+			// defer close(stdoutCH)
 
 			form := tview.NewForm().
 				AddInputField("SSID", item.GetSSID(), 20, nil, nil).
@@ -69,8 +70,9 @@ func exec(cancel context.CancelFunc, wifi wifi.Wifi, app *tview.Application, lis
 				}
 
 				stdoutCH <- fmt.Sprintf("connecting to %s", ssid)
-				_ = wifi.Conn(ssid, pass)
+				_ = wifi.Conn(ssid, pass, stdoutCH)
 				stdoutCH <- fmt.Sprintf("network status: %s", wifi.Active())
+				// close(stdoutCH)
 			})
 
 			//
