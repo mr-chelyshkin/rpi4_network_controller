@@ -69,9 +69,11 @@ func exec(cancel context.CancelFunc, wifi wifi.Wifi, app *tview.Application, lis
 					return
 				}
 
-				stdoutCH <- fmt.Sprintf("connecting to %s", ssid)
-				_ = wifi.Conn(ssid, pass, stdoutCH)
-				stdoutCH <- fmt.Sprintf("network status: %s", wifi.Active())
+				go func() {
+					stdoutCH <- fmt.Sprintf("connecting to %s", ssid)
+					_ = wifi.Conn(ssid, pass, stdoutCH)
+					stdoutCH <- fmt.Sprintf("network status: %s", wifi.Active())
+				}()
 				// close(stdoutCH)
 			})
 
