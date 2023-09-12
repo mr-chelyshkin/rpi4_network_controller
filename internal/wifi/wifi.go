@@ -28,14 +28,14 @@ func goSendToChannel(s *C.char) {
 type Wifi struct{}
 
 // NewWifi ...
-func NewWifi() (Wifi, error) {
-	return Wifi{}, nil
+func NewWifi() (*Wifi, error) {
+	return &Wifi{}, nil
 }
 
 // Scan ...
-func (w *Wifi) Scan() []*network {
+func (w *Wifi) Scan() []*Network {
 	uniqueMap := make(map[string]struct{})
-	var uniqueRes []*network
+	var uniqueRes []*Network
 
 	for _, net := range scanCGO() {
 		if C.GoString(&net.sSID[0]) == "" {
@@ -69,48 +69,48 @@ func (w *Wifi) Active() string {
 	}
 }
 
-type network struct {
+type Network struct {
 	sSID    [33]C.char
 	freq    float64
 	quality int32
 	level   int32
 }
 
-type byLevelDesc []*network
+type byLevelDesc []*Network
 
 func (a byLevelDesc) Len() int           { return len(a) }
 func (a byLevelDesc) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a byLevelDesc) Less(i, j int) bool { return a[i].level > a[j].level }
 
 // GetSSID ...
-func (n *network) GetSSID() string {
+func (n *Network) GetSSID() string {
 	return C.GoStringN(&n.sSID[0], 32)
 }
 
 // GetFreq ...
-func (n *network) GetFreq() string {
+func (n *Network) GetFreq() string {
 	return fmt.Sprintf("%.2f", n.freq/1e9)
 }
 
 // GetQuality ...
-func (n *network) GetQuality() string {
+func (n *Network) GetQuality() string {
 	return strconv.Itoa(int(n.quality))
 }
 
 // GetLevel ...
-func (n *network) GetLevel() string {
+func (n *Network) GetLevel() string {
 	return strconv.Itoa(int(n.level))
 }
 
-func scanCGO() []*network {
+func scanCGO() []*Network {
 	count := C.int(0)
 	results := C.scan(&count)
-	networks := make([]*network, count)
+	networks := make([]*Network, count)
 
 	for i := 0; i < int(count); i++ {
-		n := (*network)(
+		n := (*Network)(
 			unsafe.Pointer(
-				uintptr(unsafe.Pointer(results)) + uintptr(i)*unsafe.Sizeof(network{}),
+				uintptr(unsafe.Pointer(results)) + uintptr(i)*unsafe.Sizeof(Network{}),
 			),
 		)
 		networks[i] = n
