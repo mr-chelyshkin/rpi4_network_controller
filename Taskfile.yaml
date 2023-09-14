@@ -1,0 +1,51 @@
+version: 3
+
+vars:
+  root_dir:
+    sh: git rev-parse --show-toplevel
+  golang_lint_version: v1.51.2
+  golang_version: 1.20.6
+
+tasks:
+  default:
+    desc: Default task.
+    cmds:
+      - echo "Please enter a task name or use -l / --list-all to list all available tasks"
+    silent: true
+
+  common/vendor:
+    desc: Run go mod vendor.
+    cmds:
+      - |
+        cd {{ .root_dir }} && go mod tidy
+        if [ -d "{{ .root_dir }}/vendor" ]; then
+          echo "{{ .root_dir }}/vendor folder already exist"
+        else
+          go mod vendor
+        fi
+    silent: true
+
+  deps/install/lint:
+    desc: Install golangci-lint.
+    env:
+      URL: "https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh"
+    cmds:
+      - curl -sSfL ${URL} | sh -s -- -b $(go env GOPATH)/bin {{ .golang_lint_version }}
+      - golangci-lint version
+    sources:
+      - /usr/local/bin/golangci-lint
+    silent: true
+
+  local/lint:
+    desc: Run golangci-lint on local.
+    deps:
+      - common/vendor
+      - deps/install/lint
+    cmds:
+      - cd {{ .root_dir }} && golangci-lint run ./internal/... ./cmd/... -v --timeout=5m
+
+  docker/link:
+    desc: Run golangci-lint on docker.
+    cmds:
+      - docker build --force-rm -t network_controller_dev:latest --build-arg GO_VERSION={{ .golang_version }} -f {{ .root_dir }}/Dockerfile_dev {{ .root_dir }}
+      - docker run --rm network_controller_dev:latest bash -c "task local/lint"
