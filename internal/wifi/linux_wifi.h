@@ -20,5 +20,7 @@ const char* current_connection();
 
 void redirect_output(void);
 void reset_output(void);
+int custom_write(int fd, const void* buf, size_t count);
+
 
 #endif

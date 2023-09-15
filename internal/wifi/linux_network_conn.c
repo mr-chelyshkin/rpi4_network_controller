@@ -6,23 +6,9 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+
+
 extern void goSendToChannel(const char* s);
-
-int custom_write(int fd, const void* buf, size_t count) {
-    (void) fd;
-
-    char* s = (char*) malloc(count + 1);
-    if (!s) {
-        perror("Memory allocation failed");
-        return -1;
-    }
-
-    memcpy(s, buf, count);
-    s[count] = '\0';
-    goSendToChannel(s);
-    free(s);
-    return count;
-}
 
 int execute_command(const char *command, char *const args[]) {
     pid_t pid, wpid;
