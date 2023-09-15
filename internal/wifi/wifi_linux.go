@@ -52,15 +52,15 @@ func networkScanCGO() []*Network {
 	return networks
 }
 
-// Wifi ...
+// Wifi controller object.
 type Wifi struct{}
 
-// NewWifi ...
+// NewWifi create Wifi object.
 func NewWifi() (*Wifi, error) {
 	return &Wifi{}, nil
 }
 
-// Scan ...
+// Scan wireless network.
 func (w *Wifi) Scan() []*Network {
 	uniqueMap := make(map[string]struct{})
 	var uniqueRes []*Network
@@ -80,12 +80,12 @@ func (w *Wifi) Scan() []*Network {
 	return uniqueRes
 }
 
-// Conn ...
+// Conn to selected wireless network.
 func (w *Wifi) Conn(ssid, password string, output chan string) bool {
 	return networkConnCGO(ssid, password, output)
 }
 
-// Active ...
+// Active connection.
 func (w *Wifi) Active() string {
 	res := networkActiveCGO()
 
@@ -93,6 +93,6 @@ func (w *Wifi) Active() string {
 	case "":
 		return "No connection"
 	default:
-		return fmt.Sprintf("Current network: %s", res)
+		return res
 	}
 }
