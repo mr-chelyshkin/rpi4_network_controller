@@ -1,4 +1,4 @@
-#include "wifi.h"
+#include "linux_wifi.h"
 #include <stdio.h>
 #include <unistd.h>
 
