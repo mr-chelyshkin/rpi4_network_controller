@@ -16,7 +16,7 @@ func cmdConnect(ctx context.Context, cancel context.CancelFunc, app *tview.Appli
 }
 
 func scanner(ctx context.Context, cancel context.CancelFunc, app *tview.Application) {
-	controller, _ := wifi.NewWifi()
+	controller := wifi.NewWifi()
 	scanResults := tview.NewList()
 
 	scan(cancel, controller, app, scanResults)
@@ -96,11 +96,8 @@ func conn(network *wifi.Network, controller *wifi.Wifi, writer *tview.TextView, 
 		logs <- fmt.Sprintf("OK: %s", controller.Active())
 	}()
 	go func() {
-		for {
-			select {
-			case log := <-logs:
-				fmt.Fprintf(writer, "%s\n", log)
-			}
+		for log := range logs {
+			fmt.Fprintf(writer, "%s\n", log)
 		}
 	}()
 }

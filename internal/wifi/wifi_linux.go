@@ -56,8 +56,8 @@ func networkScanCGO() []*Network {
 type Wifi struct{}
 
 // NewWifi create Wifi object.
-func NewWifi() (*Wifi, error) {
-	return &Wifi{}, nil
+func NewWifi() *Wifi {
+	return &Wifi{}
 }
 
 // Scan wireless network.

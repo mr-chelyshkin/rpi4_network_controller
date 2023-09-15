@@ -5,5 +5,7 @@ import (
 )
 
 func main() {
-	controller.Run()
+	if err := controller.Run(); err != nil {
+		panic(err)
+	}
 }
