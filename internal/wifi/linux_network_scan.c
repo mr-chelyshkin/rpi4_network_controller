@@ -1,3 +1,4 @@
+#ifdef linux
 #include "linux_wifi.h"
 
 #include <stdio.h>
@@ -69,3 +70,4 @@ wifi_info* network_scan(int* count) {
     iw_sockets_close(sock);
     return networks;
 }
+#endif

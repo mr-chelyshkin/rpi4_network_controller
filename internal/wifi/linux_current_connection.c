@@ -1,3 +1,4 @@
+#ifdef linux
 #include "linux_wifi.h"
 
 #include <linux/wireless.h>
@@ -49,3 +50,4 @@ const char* current_connection() {
     );
     return response_msg;
 }
+#endif

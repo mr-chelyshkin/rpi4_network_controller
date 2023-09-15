@@ -1,3 +1,4 @@
+#ifdef linux
 #include "linux_wifi.h"
 
 #include <stdio.h>
@@ -59,3 +60,4 @@ int redirected_write(int fd, const void* buf, size_t count) {
     free(s);
     return count;
 }
+#endif

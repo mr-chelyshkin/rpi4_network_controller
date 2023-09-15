@@ -1,3 +1,4 @@
+#ifdef linux
 #include "linux_wifi.h"
 
 #include <stdio.h>
@@ -84,3 +85,4 @@ int network_conn(const char* ssid, const char* password) {
     }
     return 0;
 }
+#endif
