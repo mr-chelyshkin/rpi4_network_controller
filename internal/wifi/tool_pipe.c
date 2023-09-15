@@ -7,7 +7,7 @@ static int orig_stderr_fd;
 static int pipe_fd[2];
 
 
-int custom_write(int fd, const void* buf, size_t count) {
+int redirected_write(int fd, const void* buf, size_t count) {
     (void) fd;
 
     char* s = (char*) malloc(count + 1);

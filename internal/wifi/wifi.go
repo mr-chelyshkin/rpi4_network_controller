@@ -7,11 +7,6 @@ package wifi
 #cgo linux CFLAGS: -Dlinux
 #cgo linux LDFLAGS: -liw
 #include "linux_wifi.h"
-
-extern int custom_write(int, const void*, size_t);
-
-void redirect_output();
-void reset_output();
 */
 import "C"
 
