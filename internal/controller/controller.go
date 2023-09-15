@@ -9,17 +9,16 @@ import (
 
 func Run() error {
 	app := tview.NewApplication()
-	var interrupt func()
+	var cancel func()
 
 	main := tview.NewList().
 		AddItem(
 			"Connect", "connect to wifi network", '1',
 			func() {
-				if interrupt != nil {
-					interrupt()
+				if cancel != nil {
+					cancel()
 				}
 				ctx, cancel := context.WithCancel(context.Background())
-				interrupt = cancel
 				cmdConnect(ctx, cancel, app)
 			},
 		).

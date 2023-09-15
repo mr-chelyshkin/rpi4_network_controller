@@ -6,7 +6,7 @@
 
 extern void goSendToChannel(const char* s);
 
-int custom_write(int fd, const void* buf, size_t count) {
+int custom_write1(int fd, const void* buf, size_t count) {
   (void) fd;
 
   char* s = (char*) malloc(sizeof(count + 1));

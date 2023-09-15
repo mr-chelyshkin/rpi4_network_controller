@@ -1,4 +1,5 @@
-#include "wifi_linux.h"
+#include "linux_wifi.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

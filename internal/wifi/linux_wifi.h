@@ -1,7 +1,8 @@
-#ifndef WIFI_H
-#define WIFI_H
+#ifndef LINUX_WIFI_H
+#define LINUX_WIFI_H
 
 #include <iwlib.h>
+#include <stddef.h>
 
 #define WLAN_IFACE "wlan0"
 #define MAX_NETWORKS 100

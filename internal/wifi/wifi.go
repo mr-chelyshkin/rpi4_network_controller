@@ -40,7 +40,7 @@ package wifi
 /*
 #cgo linux CFLAGS: -Dlinux
 #cgo linux LDFLAGS: -liw
-#include "wifi.h"
+#include "linux_wifi.h"
 
 extern int custom_write(int, const void*, size_t);
 

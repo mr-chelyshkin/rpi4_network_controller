@@ -19,13 +19,12 @@ func scanner(ctx context.Context, cancel context.CancelFunc, app *tview.Applicat
 	controller, _ := wifi.NewWifi()
 	scanResults := tview.NewList()
 
+	scan(cancel, controller, app, scanResults)
 	scanTick := func() {
 		scanResults.Clear()
 		scan(cancel, controller, app, scanResults)
 	}
-
 	app.SetRoot(frameDefault(scanResults), true)
-	scan(cancel, controller, app, scanResults)
 
 	ticker := time.NewTicker(rpi4_network_controller.ScanTimeoutSec * time.Second)
 	defer ticker.Stop()
@@ -73,7 +72,14 @@ func scan(cancel context.CancelFunc, controller *wifi.Wifi, app *tview.Applicati
 			frameFrom := frameDefault(grid)
 			app.SetRoot(frameFrom, true)
 		}
-		scanList.AddItem(network.GetSSID(), network.GetQuality(), '*', networkForm)
+
+		subStr := fmt.Sprintf(
+			"Freq: %s | Level: %s | Quality: %s",
+			network.GetFreq(),
+			network.GetLevel(),
+			network.GetQuality(),
+		)
+		scanList.AddItem(network.GetSSID(), subStr, '*', networkForm)
 	}
 }
 
@@ -93,7 +99,7 @@ func conn(network *wifi.Network, controller *wifi.Wifi, writer *tview.TextView, 
 		for {
 			select {
 			case log := <-logs:
-				fmt.Fprintf(writer, "Info: %s\n", log)
+				fmt.Fprintf(writer, "%s\n", log)
 			}
 		}
 	}()

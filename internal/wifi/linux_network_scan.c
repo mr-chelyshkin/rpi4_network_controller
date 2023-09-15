@@ -1,4 +1,4 @@
-#include "wifi_linux.h"
+#include "linux_wifi.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,7 +20,7 @@ wifi_info* network_scan(int* count) {
             error_msg,
             sizeof(error_msg),
             "Network scan error while opening socket: %s",
-            strerror(errno),
+            strerror(errno)
         );
         perror(error_msg);
         return NULL;
@@ -30,7 +30,7 @@ wifi_info* network_scan(int* count) {
             error_msg,
             sizeof(error_msg),
             "Network scan error while getting range info: %s",
-            strerror(errno),
+            strerror(errno)
         );
         perror(error_msg);
         iw_sockets_close(sock);
@@ -42,7 +42,7 @@ wifi_info* network_scan(int* count) {
             error_msg,
             sizeof(error_msg),
             "Network scan error: %s",
-            strerror(errno),
+            strerror(errno)
         );
         perror(error_msg);
         iw_sockets_close(sock);

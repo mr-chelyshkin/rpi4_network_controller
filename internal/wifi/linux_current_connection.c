@@ -1,4 +1,4 @@
-#include "wifi_linux.h"
+#include "linux_wifi.h"
 
 #include <linux/wireless.h>
 #include <sys/ioctl.h>
@@ -6,6 +6,7 @@
 const char* current_connection() {
     static char essid[IW_ESSID_MAX_SIZE + 1];
     static char error_msg[256];
+    static char response_msg[256];
     struct iwreq wrq;
 
     memset(&wrq, 0, sizeof(wrq));
@@ -20,7 +21,7 @@ const char* current_connection() {
             error_msg,
             sizeof(error_msg),
             "Check current connection error while opening socket: %s",
-            strerror(errno),
+            strerror(errno)
         );
         return error_msg;
     }
@@ -29,7 +30,7 @@ const char* current_connection() {
             error_msg,
             sizeof(error_msg),
             "Check current connection error in ioctl: %s",
-            strerror(errno),
+            strerror(errno)
         );
         iw_sockets_close(sock);
         return error_msg;
@@ -44,7 +45,7 @@ const char* current_connection() {
         response_msg,
         sizeof(response_msg),
         "Connected to: %s",
-        essid,
+        essid
     );
     return response_msg;
 }
