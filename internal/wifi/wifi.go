@@ -1,40 +1,6 @@
 //go:build linux
 // +build linux
 
-//package wifi
-
-///*
-//#cgo linux CFLAGS: -Dlinux
-//#cgo linux LDFLAGS: -liw
-//#include "linux_wifi.h"
-//*/
-//import "C"
-//import (
-//	"fmt"
-//)
-//
-//func activeCGO() string {
-//	return C.GoString(C.active())
-//}
-//
-//type Wifi struct{}
-//
-//func NewWifi() (*Wifi, error) {
-//	return &Wifi{}, nil
-//}
-//
-//// Active ...
-//func (w *Wifi) Active() string {
-//	res := activeCGO()
-//
-//	switch res {
-//	case "":
-//		return "No connection"
-//	default:
-//		return fmt.Sprintf("Current network: %s", res)
-//	}
-//}
-
 package wifi
 
 /*
