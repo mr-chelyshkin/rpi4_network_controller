@@ -23,6 +23,35 @@ func goSendToChannel(s *C.char) {
 	outputChan <- C.GoString(s)
 }
 
+func networkActiveCGO() string {
+	return C.GoString(C.current_connection())
+}
+
+func networkConnCGO(ssid, pass string, output chan string) bool {
+	outputChan = output
+
+	C.redirect_output()
+	defer C.reset_output()
+	return C.network_conn(C.CString(ssid), C.CString(pass)) == 0
+}
+
+func networkScanCGO() []*Network {
+	count := C.int(0)
+
+	results := C.network_scan(&count)
+	networks := make([]*Network, count)
+
+	for i := 0; i < int(count); i++ {
+		n := (*Network)(
+			unsafe.Pointer(
+				uintptr(unsafe.Pointer(results)) + uintptr(i)*unsafe.Sizeof(Network{}),
+			),
+		)
+		networks[i] = n
+	}
+	return networks
+}
+
 // Wifi ...
 type Wifi struct{}
 
@@ -36,7 +65,7 @@ func (w *Wifi) Scan() []*Network {
 	uniqueMap := make(map[string]struct{})
 	var uniqueRes []*Network
 
-	for _, net := range scanCGO() {
+	for _, net := range networkScanCGO() {
 		if C.GoString(&net.sSID[0]) == "" {
 			continue
 		}
@@ -53,12 +82,12 @@ func (w *Wifi) Scan() []*Network {
 
 // Conn ...
 func (w *Wifi) Conn(ssid, password string, output chan string) bool {
-	return connCGO(ssid, password, output)
+	return networkConnCGO(ssid, password, output)
 }
 
 // Active ...
 func (w *Wifi) Active() string {
-	res := activeCGO()
+	res := networkActiveCGO()
 
 	switch res {
 	case "":
@@ -66,34 +95,4 @@ func (w *Wifi) Active() string {
 	default:
 		return fmt.Sprintf("Current network: %s", res)
 	}
-}
-
-func scanCGO() []*Network {
-	count := C.int(0)
-	results := C.network_scan(&count)
-	networks := make([]*Network, count)
-
-	for i := 0; i < int(count); i++ {
-		n := (*Network)(
-			unsafe.Pointer(
-				uintptr(unsafe.Pointer(results)) + uintptr(i)*unsafe.Sizeof(Network{}),
-			),
-		)
-		networks[i] = n
-	}
-	return networks
-}
-
-func activeCGO() string {
-	return C.GoString(C.current_connection())
-}
-
-func connCGO(ssid, pass string, output chan string) bool {
-	outputChan = output
-	C.redirect_output()
-	result := C.network_conn(C.CString(ssid), C.CString(pass)) == 0
-	C.reset_output()
-
-	return result
-	// return C.conn(C.CString(ssid), C.CString(pass)) == 0
 }
