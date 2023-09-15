@@ -13,7 +13,6 @@ import "C"
 import (
 	"fmt"
 	"sort"
-	"strconv"
 	"unsafe"
 )
 
@@ -67,39 +66,6 @@ func (w *Wifi) Active() string {
 	default:
 		return fmt.Sprintf("Current network: %s", res)
 	}
-}
-
-type Network struct {
-	sSID    [33]C.char
-	freq    float64
-	quality int32
-	level   int32
-}
-
-type byLevelDesc []*Network
-
-func (a byLevelDesc) Len() int           { return len(a) }
-func (a byLevelDesc) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a byLevelDesc) Less(i, j int) bool { return a[i].level > a[j].level }
-
-// GetSSID ...
-func (n *Network) GetSSID() string {
-	return C.GoStringN(&n.sSID[0], 32)
-}
-
-// GetFreq ...
-func (n *Network) GetFreq() string {
-	return fmt.Sprintf("%.2f", n.freq/1e9)
-}
-
-// GetQuality ...
-func (n *Network) GetQuality() string {
-	return strconv.Itoa(int(n.quality))
-}
-
-// GetLevel ...
-func (n *Network) GetLevel() string {
-	return strconv.Itoa(int(n.level))
 }
 
 func scanCGO() []*Network {
