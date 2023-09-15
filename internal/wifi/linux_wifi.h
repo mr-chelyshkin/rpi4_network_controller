@@ -14,13 +14,12 @@ typedef struct wifi_info {
     int level;
 } wifi_info;
 
-int         network_conn(const char* ssid, const char* password);
-wifi_info*  network_scan(int* count);
+int network_conn(const char* ssid, const char* password);
+wifi_info* network_scan(int* count);
 const char* current_connection();
-
 void redirect_output(void);
 void reset_output(void);
 int custom_write(int fd, const void* buf, size_t count);
+extern void goSendToChannel(char* s);
+#endif // LINUX_WIFI_H
 
-
-#endif

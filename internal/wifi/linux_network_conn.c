@@ -8,7 +8,6 @@
 
 
 
-extern void goSendToChannel(const char* s);
 
 int execute_command(const char *command, char *const args[]) {
     pid_t pid, wpid;

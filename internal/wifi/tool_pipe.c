@@ -7,7 +7,6 @@ static int orig_stderr_fd;
 static int pipe_fd[2];
 
 
-extern void goSendToChannel(const char* s);
 int custom_write(int fd, const void* buf, size_t count) {
     (void) fd;
 
