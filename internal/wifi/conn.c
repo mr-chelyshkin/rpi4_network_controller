@@ -21,7 +21,7 @@ int custom_write(int fd, const void* buf, size_t count) {
 
 int conn(const char* ssid, const char* password) {
     int retval;
-    goSendToChannel("Shhit");
+    goSendToChannel("hello");
     retval = system("killall wpa_supplicant");
     if (retval == -1) {
         perror("Failed to run 'killall wpa_supplicant'");

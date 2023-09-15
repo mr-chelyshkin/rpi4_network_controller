@@ -1,3 +1,40 @@
+//go:build linux
+// +build linux
+
+//package wifi
+
+///*
+//#cgo linux CFLAGS: -Dlinux
+//#cgo linux LDFLAGS: -liw
+//#include "linux_wifi.h"
+//*/
+//import "C"
+//import (
+//	"fmt"
+//)
+//
+//func activeCGO() string {
+//	return C.GoString(C.active())
+//}
+//
+//type Wifi struct{}
+//
+//func NewWifi() (*Wifi, error) {
+//	return &Wifi{}, nil
+//}
+//
+//// Active ...
+//func (w *Wifi) Active() string {
+//	res := activeCGO()
+//
+//	switch res {
+//	case "":
+//		return "No connection"
+//	default:
+//		return fmt.Sprintf("Current network: %s", res)
+//	}
+//}
+
 package wifi
 
 /*
@@ -106,7 +143,7 @@ func (n *Network) GetLevel() string {
 
 func scanCGO() []*Network {
 	count := C.int(0)
-	results := C.scan(&count)
+	results := C.network_scan(&count)
 	networks := make([]*Network, count)
 
 	for i := 0; i < int(count); i++ {
@@ -121,13 +158,13 @@ func scanCGO() []*Network {
 }
 
 func activeCGO() string {
-	return C.GoString(C.active())
+	return C.GoString(C.current_connection())
 }
 
 func connCGO(ssid, pass string, output chan string) bool {
 	outputChan = output
 	C.redirect_output()
-	result := C.conn(C.CString(ssid), C.CString(pass)) == 0
+	result := C.network_conn(C.CString(ssid), C.CString(pass)) == 0
 	C.reset_output()
 
 	return result
