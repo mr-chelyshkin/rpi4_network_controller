@@ -1,4 +1,5 @@
 //go:build linux
+// +build linux
 
 package wifi
 
@@ -9,6 +10,11 @@ package wifi
 #include "linux_wifi.h"
 */
 import "C"
+import (
+	"fmt"
+	"sort"
+	"unsafe"
+)
 
 var outputCh chan string
 
@@ -55,12 +61,12 @@ func NewWifi() (*Wifi, error) {
 
 // Active return current wifi connection.
 func (w *Wifi) Active() string {
-	return activeCGO()
+	return networkActiveCGO()
 }
 
 // Conn try to connect to selected network.
 func (w *Wifi) Conn(ssid, password string, output chan string) bool {
-	return connCGO(ssid, password, output)
+	return networkConnCGO(ssid, password, output)
 }
 
 // Scan make scan wireless networks.
@@ -68,7 +74,7 @@ func (w *Wifi) Scan() []*Network {
 	var results []*Network
 
 	m := make(map[string]struct{})
-	for _, net := range scanCGO() {
+	for _, net := range networkScanCGO() {
 		if C.GoString(&net.sSID[0]) == "" {
 			continue
 		}
