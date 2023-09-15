@@ -1,18 +1,21 @@
 #include "linux_wifi.h"
 
 #include <stdio.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
 
+/**
+ * Function to scan for available WiFi networks.
+ */
 wifi_info* network_scan(int* count) {
     wireless_scan_head head;
     wireless_scan *result;
     iwrange range;
-    int sock;
 
     static wifi_info networks[MAX_NETWORKS];
     static char error_msg[256];
+    int sock;
 
     sock = iw_sockets_open();
     if (sock < 0) {
@@ -22,7 +25,7 @@ wifi_info* network_scan(int* count) {
             "Network scan error while opening socket: %s",
             strerror(errno)
         );
-        perror(error_msg);
+        goSendToChannel(error_msg);
         return NULL;
     }
     if (iw_get_range_info(sock, WLAN_IFACE, &range) < 0) {
@@ -32,11 +35,10 @@ wifi_info* network_scan(int* count) {
             "Network scan error while getting range info: %s",
             strerror(errno)
         );
-        perror(error_msg);
+        goSendToChannel(error_msg);
         iw_sockets_close(sock);
         return NULL;
     }
-
     if (iw_scan(sock, WLAN_IFACE, range.we_version_compiled, &head) < 0) {
         snprintf(
             error_msg,
@@ -44,7 +46,7 @@ wifi_info* network_scan(int* count) {
             "Network scan error: %s",
             strerror(errno)
         );
-        perror(error_msg);
+        goSendToChannel(error_msg);
         iw_sockets_close(sock);
         return NULL;
     }
@@ -64,8 +66,6 @@ wifi_info* network_scan(int* count) {
         result = result->next;
     }
     *count = i;
-
     iw_sockets_close(sock);
     return networks;
 }
-
