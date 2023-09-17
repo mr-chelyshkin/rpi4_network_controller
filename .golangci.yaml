@@ -1,0 +1,70 @@
+linters-settings:
+  gosimple:
+    checks:
+      - all
+  errcheck:
+    check-type-assertions: true
+    check-blank: true
+  govet:
+    check-shadowing: false
+  gofmt:
+    simplify: true
+  revive:
+    ignore-generated-header: true
+  gocyclo:
+    min-complexity: 12
+  dupl:
+    threshold: 100
+  goconst:
+    min-len: 12
+    min-occurrences: 12
+    ignore-calls: false
+  misspell:
+    locale: US
+
+linters:
+  disable-all: true
+  enable:
+    - ineffassign
+    - typecheck
+    - govet
+    - errcheck
+    - unused
+    - revive
+    - gosec
+    - gosimple
+    - goconst
+    - unconvert
+    - gofmt
+    - goimports
+    - misspell
+    - godot
+    - unconvert
+    - gofumpt
+
+run:
+  skip-dirs-use-default: true
+  timeout: 5m
+  modules-download-mode: vendor
+  skip-files:
+    - ".*._mock.go$"
+    - ".*._test.go$"
+
+issues:
+  exclude-rules:
+    - linters:
+        - typecheck
+      text: "build constraints exclude all Go files"
+    - linters:
+        - gosec
+      text: "Deferring unsafe method"
+    - linters:
+        - errcheck
+      text: "Close` is not checked"
+    - linters:
+        - golint
+      text: "a blank import should be only in a main or test package"
+  exclude:
+    - "should have a package comment, unless it's in another file for this package"
+  exclude-use-default: false
+  max-same-issues: 0

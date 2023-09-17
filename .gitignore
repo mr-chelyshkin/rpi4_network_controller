@@ -3,8 +3,11 @@
 # https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
 #
 
+# commons
+.task
 .idea
-release.sh
+bin
+network
 
 # Binaries for programs and plugins
 *.exe
@@ -20,7 +23,7 @@ release.sh
 *.out
 
 # Dependency directories (remove the comment below to include it)
-# vendor/
+vendor/
 
 # Go workspace file
 go.work
