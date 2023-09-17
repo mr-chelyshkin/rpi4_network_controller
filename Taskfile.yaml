@@ -25,6 +25,39 @@ tasks:
         fi
     silent: true
 
+  common/publish:
+    desc: Upload binary to GitHub.
+    env:
+      REPO_NAME: "rpi4_network_controller"
+      FILE_PATH: "{{ .root_dir }}/network"
+      RELEASE_NAME: ""
+      RELEASE_DESC: ""
+      REPO_USER: ""
+      TOKEN: ""
+    cmds:
+      - |
+        RELEASE_RESPONSE=$(curl --data "{\"tag_name\": \"${RELEASE_NAME}\", \"name\": \"${RELEASE_NAME}\", \"body\": \"${RELEASE_DESC}\"}" \
+          -H "Authorization: token ${TOKEN}" \
+          -H "Content-Type: application/json" \
+          -X POST https://api.github.com/repos/"${REPO_USER}"/"${REPO_NAME}"/releases)
+        UPLOAD_URL=$(echo "${RELEASE_RESPONSE}" | jq -r .upload_url | sed -e "s/{?name,label}//")
+        
+        if echo "${RELEASE_RESPONSE}" | grep -q "message"; then
+          echo "Error creating the release:"
+          echo "${RELEASE_RESPONSE}" | jq .message
+          exit 1
+        fi
+        
+        if [ -z "${UPLOAD_URL}" ] || [ "${UPLOAD_URL}" == "null" ]; then
+          echo "Failed to get the upload URL. Check if the release was created successfully or if you've exceeded the rate limit."
+          exit 1
+        fi
+        
+        curl -H "Authorization: token $TOKEN" \
+          -H "Content-Type: $(file -b --mime-type ${FILE_PATH})" \
+          -X POST "${UPLOAD_URL}?name=$(basename ${FILE_PATH})" \
+          --upload-file "${FILE_PATH}"
+
   deps/install/lint:
     desc: Install golangci-lint.
     env:
@@ -44,8 +77,26 @@ tasks:
     cmds:
       - cd {{ .root_dir }} && golangci-lint run ./internal/... ./cmd/... -v --timeout=5m
 
+  local/build/rpi:
+    desc: Build binary for raspberry
+    env:
+      CC: aarch64-linux-gnu-gcc
+      CFLAGS: -march=armv8-a
+      CGO_ENABLED: 1
+      GOARCH: arm64
+      GOOS: linux
+    cmds:
+      - cd {{ .root_dir }} && go build -asmflags="-trimpath=OPATH" -ldflags="-w -s" -gcflags="-trimpath=OPATH" -o {{ .root_dir }}/network ./cmd
+      - chmod a+x {{ .root_dir }}/network
+
   docker/link:
     desc: Run golangci-lint on docker.
     cmds:
-      - docker build --force-rm -t network_controller_dev:latest --build-arg GO_VERSION={{ .golang_version }} -f {{ .root_dir }}/Dockerfile_dev {{ .root_dir }}
+      - docker build --force-rm -t network_controller_dev:latest --build-arg GO_VERSION={{ .golang_version }} -f {{ .root_dir }}/Dockerfile {{ .root_dir }}
       - docker run --rm network_controller_dev:latest bash -c "task local/lint"
+
+  docker/upload:
+    desc: Publish release.
+    cmds:
+      - docker build --force-rm -t network_controller_dev:latest --build-arg GO_VERSION={{ .golang_version }} -f {{ .root_dir }}/Dockerfile {{ .root_dir }}
+      - docker run --rm network_controller_dev:latest bash -c "task local/build/rpi common/publish"
