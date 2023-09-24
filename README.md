@@ -6,6 +6,15 @@
 
 This is a console tool for manage wireless network connection on Raspberry.
 
+### menu
+![menu](https://github.com/mr-chelyshkin/rpi4_network_controller/blob/main/.img/main_menu.jpeg)
+
+### scan
+![scan](https://github.com/mr-chelyshkin/rpi4_network_controller/blob/main/.img/scan_wifi.jpeg)
+
+### connect
+![connect](https://github.com/mr-chelyshkin/rpi4_network_controller/blob/main/.img/connect.jpeg)
+
 ## Requirements:
  - Raspberry Pi
  - Raspbian OS (Debian)
