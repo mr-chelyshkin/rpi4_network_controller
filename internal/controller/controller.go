@@ -21,8 +21,8 @@ func Run() error {
 				ctx, cancel := context.WithCancel(context.Background())
 				cmdConnect(ctx, cancel, app)
 			},
-		).
-		AddItem("Disconnect", "interrupt wifi connection", '2', nil)
+		)
+	//AddItem("Disconnect", "interrupt wifi connection", '2', nil)
 	frameMain := frameDefault(main)
 
 	app.SetInputCapture(
