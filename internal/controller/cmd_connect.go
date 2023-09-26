@@ -117,20 +117,23 @@ func scan(cancel context.CancelFunc, controller *wifi.Wifi, app *tview.Applicati
 }
 
 func conn(network *wifi.Network, controller *wifi.Wifi, writer *tview.TextView, password string) {
-	logs := make(chan string, 5)
+	log := make(chan string, 1)
 	if len(password) < 8 {
-		logs <- "Error: WiFi password should be 8 more chars."
+		fmt.Fprintf(writer, "%s\n", "Error: WiFi password should be 8 more chars.")
 		return
 	}
 
 	go func() {
-		logs <- fmt.Sprintf("Info: Try connecting to '%s'", network.GetSSID())
-		_ = controller.Conn(network.GetSSID(), password, logs)
-		logs <- fmt.Sprintf("OK: %s", controller.Active())
+		log <- fmt.Sprintf("Info: Try connecting to '%s'", network.GetSSID())
+		_ = controller.Conn(network.GetSSID(), password, log)
+		log <- fmt.Sprintf("OK: %s", controller.Active())
 	}()
 	go func() {
-		for log := range logs {
-			fmt.Fprintf(writer, "%s\n", log)
+		for {
+			select {
+			case l := <-log:
+				fmt.Fprintf(writer, "%s\n", l)
+			}
 		}
 	}()
 }
