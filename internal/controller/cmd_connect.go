@@ -3,7 +3,6 @@ package controller
 import (
 	"context"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/mr-chelyshkin/rpi4_network_controller"
@@ -47,6 +46,7 @@ func scan(cancel context.CancelFunc, controller *wifi.Wifi, app *tview.Applicati
 			cancel()
 
 			writer := tview.NewTextView().
+				ScrollToEnd().
 				SetDynamicColors(true).
 				SetChangedFunc(func() { app.Draw() })
 			form := tview.NewForm().
@@ -95,7 +95,6 @@ func conn(network *wifi.Network, controller *wifi.Wifi, writer *tview.TextView, 
 		logs <- fmt.Sprintf("Info: Try connecting to '%s'", network.GetSSID())
 		_ = controller.Conn(network.GetSSID(), password, logs)
 		logs <- fmt.Sprintf("OK: %s", controller.Active())
-		os.Exit(0)
 	}()
 	go func() {
 		for log := range logs {
