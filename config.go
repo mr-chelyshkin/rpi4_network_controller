@@ -1,5 +1,5 @@
 package rpi4_network_controller
 
 const (
-	ScanTimeoutSec = 8
+	ScanTimeoutSec = 4
 )

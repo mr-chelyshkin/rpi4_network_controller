@@ -8,28 +8,21 @@ import (
 )
 
 func Run() error {
+	stop := make(chan struct{}, 1)
 	app := tview.NewApplication()
-	var cancel func()
+	ctx := context.Background()
 
 	main := tview.NewList().
-		AddItem(
-			"Connect", "connect to wifi network", '1',
-			func() {
-				if cancel != nil {
-					cancel()
-				}
-				ctx, cancel := context.WithCancel(context.Background())
-				cmdConnect(ctx, cancel, app)
-			},
-		).
+		AddItem("Connect", "connect to wifi network", '1', func() { cmdConnect(ctx, stop, app) }).
 		AddItem("Disconnect", "interrupt wifi connection", '2', nil)
-	frameMain := frameDefault(main)
+	frameMain := frameDefault(ctx, main, nil)
 
 	app.SetInputCapture(
 		func(event *tcell.EventKey) *tcell.EventKey {
 			switch event.Key() {
 			case tcell.KeyESC:
 				app.SetRoot(frameMain, true)
+				stop <- struct{}{}
 			case tcell.KeyCtrlC:
 				app.Stop()
 			}
