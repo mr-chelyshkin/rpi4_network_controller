@@ -11,9 +11,12 @@ import (
 	"github.com/rivo/tview"
 )
 
-func cmdConnect(ctx context.Context, stop chan struct{}, app *tview.Application) {
+func cmdConnect(
+	ctx context.Context,
+	stop chan struct{},
+) {
 	cctx, cancel := context.WithCancel(ctx)
-	go scanner(cctx, cancel, app)
+	go scanner(cctx, cancel)
 
 	go func() {
 		for {
@@ -26,12 +29,15 @@ func cmdConnect(ctx context.Context, stop chan struct{}, app *tview.Application)
 	}()
 }
 
-func scanner(ctx context.Context, cancel context.CancelFunc, app *tview.Application) {
+func scanner(
+	ctx context.Context,
+	cancel context.CancelFunc,
+) {
 	scanResults := tview.NewList()
 	controller := wifi.NewWifi()
 	log := make(chan string, 1)
 
-	app.SetRoot(frameDefault(ctx, scanResults, log), true)
+	rpi4_network_controller.App.SetRoot(frameDefault(ctx, scanResults, log), true)
 	log <- fmt.Sprintf(
 		"Update networks every %d(sec)\n",
 		rpi4_network_controller.ScanTimeoutSec,
@@ -42,7 +48,11 @@ func scanner(ctx context.Context, cancel context.CancelFunc, app *tview.Applicat
 	for {
 		select {
 		case <-ticker.C:
-			app.QueueUpdateDraw(func() { scan(ctx, cancel, controller, app, scanResults) })
+			rpi4_network_controller.App.QueueUpdateDraw(
+				func() {
+					scan(ctx, cancel, controller, scanResults)
+				},
+			)
 		case <-ctx.Done():
 			close(log)
 			return
@@ -50,7 +60,12 @@ func scanner(ctx context.Context, cancel context.CancelFunc, app *tview.Applicat
 	}
 }
 
-func scan(ctx context.Context, cancel context.CancelFunc, controller *wifi.Wifi, app *tview.Application, scanList *tview.List) {
+func scan(
+	ctx context.Context,
+	cancel context.CancelFunc,
+	controller *wifi.Wifi,
+	scanList *tview.List,
+) {
 	type networkDetails struct {
 		description string
 		form        func()
@@ -64,26 +79,8 @@ func scan(ctx context.Context, cancel context.CancelFunc, controller *wifi.Wifi,
 			network := network
 
 			networkForm := func() {
-				log := make(chan string, 1)
 				cancel()
-
-				nctx := context.Background()
-				form := tview.NewForm().
-					AddInputField("SSID", network.GetSSID(), 40, nil, nil).
-					AddPasswordField("Password", "", 40, '*', nil)
-				form.AddButton(
-					"Connect",
-					func() {
-						conn(
-							log,
-							network,
-							controller,
-							form.GetFormItem(1).(*tview.InputField).GetText(),
-						)
-					},
-				)
-				frameFrom := frameDefault(nctx, form, log)
-				app.SetRoot(frameFrom, true)
+				form(network, controller)
 			}
 
 			description := fmt.Sprintf(
@@ -100,8 +97,8 @@ func scan(ctx context.Context, cancel context.CancelFunc, controller *wifi.Wifi,
 					title:       network.GetSSID(),
 				},
 			)
-			refresh <- struct{}{}
 		}
+		refresh <- struct{}{}
 	}()
 	go func() {
 		for {
@@ -124,12 +121,45 @@ func scan(ctx context.Context, cancel context.CancelFunc, controller *wifi.Wifi,
 	}()
 }
 
-func conn(log chan string, network *wifi.Network, controller *wifi.Wifi, password string) {
+func form(
+	network *wifi.Network,
+	controller *wifi.Wifi,
+) {
+	ctx := context.Background()
+	log := make(chan string, 1)
+
+	form := tview.NewForm().
+		AddInputField("SSID", network.GetSSID(), 40, nil, nil).
+		AddPasswordField("Password", "", 40, '*', nil)
+	form.AddButton(
+		"Connect",
+		func() {
+			conn(
+				log,
+				network,
+				controller,
+				form.GetFormItem(1).(*tview.InputField).GetText(),
+			)
+		},
+	)
+	frameForm := frameDefault(ctx, form, log)
+	rpi4_network_controller.App.SetRoot(frameForm, true)
+}
+
+func conn(
+	log chan string,
+	network *wifi.Network,
+	controller *wifi.Wifi,
+	password string,
+) {
 	log <- fmt.Sprintf("Try connect to %s", network.GetSSID())
 	if len(password) < 8 {
 		log <- "WiFi password should be 8 or more chars"
 		return
 	}
-	go controller.Conn(network.GetSSID(), password, log)
-	log <- controller.Active()
+
+	go func() {
+		_ = controller.Conn(network.GetSSID(), password, log)
+		log <- controller.Active()
+	}()
 }

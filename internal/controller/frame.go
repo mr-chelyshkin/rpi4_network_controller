@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/gdamore/tcell/v2"
+	"github.com/mr-chelyshkin/rpi4_network_controller"
 	"github.com/rivo/tview"
 )
 
@@ -15,7 +16,8 @@ func frameDefault(
 ) *tview.Frame {
 	logWriter := tview.NewTextView().
 		ScrollToEnd().
-		SetDynamicColors(true)
+		SetDynamicColors(true).
+		SetChangedFunc(func() { rpi4_network_controller.App.Draw() })
 	grid := tview.NewGrid().
 		SetRows(-5, 1, 0).
 		SetBorders(true).
