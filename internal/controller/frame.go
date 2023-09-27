@@ -4,20 +4,19 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/gdamore/tcell/v2"
 	"github.com/mr-chelyshkin/rpi4_network_controller"
+
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
-func frameDefault(
-	ctx context.Context,
-	obj tview.Primitive,
-	log chan string,
-) *tview.Frame {
+func frameDefault(ctx context.Context, obj tview.Primitive, log chan string) *tview.Frame {
 	logWriter := tview.NewTextView().
 		ScrollToEnd().
 		SetDynamicColors(true).
-		SetChangedFunc(func() { rpi4_network_controller.App.Draw() })
+		SetChangedFunc(func() {
+			rpi4_network_controller.App.Draw()
+		})
 	grid := tview.NewGrid().
 		SetRows(-5, 1, 0).
 		SetBorders(true).

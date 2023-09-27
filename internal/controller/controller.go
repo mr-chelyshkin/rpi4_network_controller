@@ -3,8 +3,9 @@ package controller
 import (
 	"context"
 
-	"github.com/gdamore/tcell/v2"
 	"github.com/mr-chelyshkin/rpi4_network_controller"
+
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
@@ -29,5 +30,9 @@ func Run() error {
 			return event
 		},
 	)
-	return rpi4_network_controller.App.SetRoot(frameMain, true).SetFocus(frameMain).Run()
+	return rpi4_network_controller.App.SetRoot(
+		frameMain, true,
+	).SetFocus(
+		frameMain,
+	).Run()
 }

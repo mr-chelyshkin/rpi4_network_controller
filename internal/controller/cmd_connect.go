@@ -11,10 +11,7 @@ import (
 	"github.com/rivo/tview"
 )
 
-func cmdConnect(
-	ctx context.Context,
-	stop chan struct{},
-) {
+func cmdConnect(ctx context.Context, stop chan struct{}) {
 	cctx, cancel := context.WithCancel(ctx)
 	go scanner(cctx, cancel)
 
@@ -29,22 +26,25 @@ func cmdConnect(
 	}()
 }
 
-func scanner(
-	ctx context.Context,
-	cancel context.CancelFunc,
-) {
+func scanner(ctx context.Context, cancel context.CancelFunc) {
 	scanResults := tview.NewList()
 	controller := wifi.NewWifi()
 	log := make(chan string, 1)
 
-	rpi4_network_controller.App.SetRoot(frameDefault(ctx, scanResults, log), true)
+	rpi4_network_controller.App.SetRoot(
+		frameDefault(ctx, scanResults, log),
+		true,
+	)
 	log <- fmt.Sprintf(
 		"Update networks every %d(sec)\n",
 		rpi4_network_controller.ScanTimeoutSec,
 	)
 
-	ticker := time.NewTicker(rpi4_network_controller.ScanTimeoutSec * time.Second)
+	ticker := time.NewTicker(
+		rpi4_network_controller.ScanTimeoutSec * time.Second,
+	)
 	defer ticker.Stop()
+	scan(ctx, cancel, controller, scanResults)
 	for {
 		select {
 		case <-ticker.C:
