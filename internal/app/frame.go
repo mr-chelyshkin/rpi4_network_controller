@@ -10,8 +10,16 @@ import (
 
 var app = tview.NewApplication()
 
+func setFrame(frame *tview.Frame) *tview.Application {
+	return app.SetRoot(frame, true).SetFocus(frame)
+}
+
+func appRun(frame *tview.Frame) error {
+	return setFrame(frame).Run()
+}
+
 func frameDraw(frame *tview.Frame) {
-	app.SetRoot(frame, true).SetFocus(frame).Draw()
+	setFrame(frame).Draw()
 }
 
 func frameWrapper(ctx context.Context, p tview.Primitive, o chan string) *tview.Frame {

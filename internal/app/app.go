@@ -7,6 +7,7 @@ import (
 	"github.com/rivo/tview"
 )
 
+// Run application.
 func Run() error {
 	stop := make(chan struct{}, 1)
 	ctx := context.Background()
@@ -19,7 +20,7 @@ func Run() error {
 		func(event *tcell.EventKey) *tcell.EventKey {
 			switch event.Key() {
 			case tcell.KeyESC:
-				app.SetRoot(frameWrapper(ctx, frame, nil), true).SetFocus(frame)
+				setFrame(frameWrapper(ctx, frame, nil))
 				stop <- struct{}{}
 			case tcell.KeyCtrlC:
 				stop <- struct{}{}
@@ -28,5 +29,5 @@ func Run() error {
 			return event
 		},
 	)
-	return app.SetRoot(frameWrapper(ctx, frame, nil), true).SetFocus(frame).Run()
+	return appRun(frameWrapper(ctx, frame, nil))
 }

@@ -6,10 +6,12 @@ import (
 	"github.com/mr-chelyshkin/rpi4_network_controller/pkg/wifi"
 )
 
+// Controller object.
 type Controller struct {
 	output chan string
 }
 
+// New return Controller object.
 func New(output chan string) *Controller {
 	return &Controller{
 		output: output,
@@ -25,7 +27,7 @@ func (c *Controller) Scan(ctx context.Context) []*wifi.Network {
 	}()
 	select {
 	case <-ctx.Done():
-		return nil // return nil or handle this situation as you see fit
+		return nil
 	case result := <-resultCh:
 		return result
 	}
@@ -40,7 +42,7 @@ func (c *Controller) Connect(ctx context.Context, ssid, password string) bool {
 	}()
 	select {
 	case <-ctx.Done():
-		return false // return false or handle this situation as you see fit
+		return false
 	case result := <-resultCh:
 		return result
 	}
@@ -55,7 +57,7 @@ func (c *Controller) Status(ctx context.Context) string {
 	}()
 	select {
 	case <-ctx.Done():
-		return "" // return an empty string or handle this situation as you see fit
+		return ""
 	case result := <-resultCh:
 		return result
 	}
