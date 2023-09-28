@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/mr-chelyshkin/rpi4_network_controller"
-	"github.com/mr-chelyshkin/rpi4_network_controller/internal/wifi"
+	"github.com/mr-chelyshkin/rpi4_network_controller/internal/wifi1"
 
 	"github.com/rivo/tview"
 )
@@ -28,7 +28,7 @@ func cmdConnect(ctx context.Context, stop chan struct{}) {
 
 func scanner(ctx context.Context, cancel context.CancelFunc) {
 	scanResults := tview.NewList()
-	controller := wifi.NewWifi()
+	controller := wifi1.NewWifi()
 	log := make(chan string, 1)
 
 	rpi4_network_controller.App.SetRoot(
@@ -63,7 +63,7 @@ func scanner(ctx context.Context, cancel context.CancelFunc) {
 func scan(
 	ctx context.Context,
 	cancel context.CancelFunc,
-	controller *wifi.Wifi,
+	controller *wifi1.Wifi,
 	scanList *tview.List,
 ) {
 	type networkDetails struct {
@@ -122,8 +122,8 @@ func scan(
 }
 
 func form(
-	network *wifi.Network,
-	controller *wifi.Wifi,
+	network *wifi1.Network,
+	controller *wifi1.Wifi,
 ) {
 	ctx := context.Background()
 	log := make(chan string, 1)
@@ -148,8 +148,8 @@ func form(
 
 func conn(
 	log chan string,
-	network *wifi.Network,
-	controller *wifi.Wifi,
+	network *wifi1.Network,
+	controller *wifi1.Wifi,
 	password string,
 ) {
 	log <- fmt.Sprintf("Try connect to %s", network.GetSSID())

@@ -37,7 +37,7 @@ wifi_info* network_scan(int* count);
  *
  * @return The SSID of the current connection or NULL if not connected.
  */
-const char* current_connection();
+const char* network_state();
 
 /**
  * Redirect the standard output and error streams.

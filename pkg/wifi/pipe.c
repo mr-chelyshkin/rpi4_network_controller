@@ -1,8 +1,13 @@
-#ifdef linux
+#ifdef __linux__
 #include "linux_wifi.h"
+#elif defined(__APPLE__) && defined(__MACH__)
+#include "darwin_wifi.h"
+#endif
 
 #include <stdio.h>
 #include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
 
 // Global variables to hold the original stdout and stderr file descriptors.
 static int orig_stdout_fd;
@@ -60,4 +65,3 @@ int redirected_write(int fd, const void* buf, size_t count) {
     free(s);
     return count;
 }
-#endif

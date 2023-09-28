@@ -5,7 +5,7 @@
 #include <sys/ioctl.h>
 
 // Function to check the currently connected WiFi network.
-const char* current_connection() {
+const char* network_state() {
     static char essid[IW_ESSID_MAX_SIZE + 1];
     static char response_msg[256];
     static char error_msg[256];
@@ -13,6 +13,7 @@ const char* current_connection() {
     struct iwreq wrq;
     memset(&wrq, 0, sizeof(wrq));
     strncpy(wrq.ifr_name, WLAN_IFACE, IFNAMSIZ);
+    wrq.ifr_name[IFNAMSIZ - 1] = '\0';
     wrq.u.essid.length = sizeof(essid);
     wrq.u.essid.pointer = essid;
 
