@@ -3,38 +3,36 @@ package controller
 import (
 	"context"
 
+	"github.com/mr-chelyshkin/rpi4_network_controller"
+
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
 func Run() error {
-	app := tview.NewApplication()
-	var cancel func()
+	stop := make(chan struct{}, 1)
+	ctx := context.Background()
 
 	main := tview.NewList().
-		AddItem(
-			"Connect", "connect to wifi network", '1',
-			func() {
-				if cancel != nil {
-					cancel()
-				}
-				ctx, cancel := context.WithCancel(context.Background())
-				cmdConnect(ctx, cancel, app)
-			},
-		).
+		AddItem("Connect", "connect to wifi network", '1', func() { cmdConnect(ctx, stop) }).
 		AddItem("Disconnect", "interrupt wifi connection", '2', nil)
-	frameMain := frameDefault(main)
+	frameMain := frameDefault(ctx, main, nil)
 
-	app.SetInputCapture(
+	rpi4_network_controller.App.SetInputCapture(
 		func(event *tcell.EventKey) *tcell.EventKey {
 			switch event.Key() {
 			case tcell.KeyESC:
-				app.SetRoot(frameMain, true)
+				rpi4_network_controller.App.SetRoot(frameMain, true)
+				stop <- struct{}{}
 			case tcell.KeyCtrlC:
-				app.Stop()
+				rpi4_network_controller.App.Stop()
 			}
 			return event
 		},
 	)
-	return app.SetRoot(frameMain, true).SetFocus(frameMain).Run()
+	return rpi4_network_controller.App.SetRoot(
+		frameMain, true,
+	).SetFocus(
+		frameMain,
+	).Run()
 }
