@@ -6,18 +6,18 @@ import (
 	"github.com/mr-chelyshkin/rpi4_network_controller/pkg/wifi"
 )
 
-type controller struct {
+type Controller struct {
 	output chan string
 }
 
-func New(output chan string) *controller {
-	return &controller{
+func New(output chan string) *Controller {
+	return &Controller{
 		output: output,
 	}
 }
 
 // Scan scans for available networks and returns the result.
-func (c *controller) Scan(ctx context.Context) []*wifi.Network {
+func (c *Controller) Scan(ctx context.Context) []*wifi.Network {
 	resultCh := make(chan []*wifi.Network, 1)
 	go func() {
 		defer close(resultCh)
@@ -32,7 +32,7 @@ func (c *controller) Scan(ctx context.Context) []*wifi.Network {
 }
 
 // Connect tries to connect to a network and returns the result.
-func (c *controller) Connect(ctx context.Context, ssid, password string) bool {
+func (c *Controller) Connect(ctx context.Context, ssid, password string) bool {
 	resultCh := make(chan bool, 1)
 	go func() {
 		defer close(resultCh)
@@ -47,7 +47,7 @@ func (c *controller) Connect(ctx context.Context, ssid, password string) bool {
 }
 
 // Status gets the wifi connection status.
-func (c *controller) Status(ctx context.Context) string {
+func (c *Controller) Status(ctx context.Context) string {
 	resultCh := make(chan string, 1)
 	go func() {
 		defer close(resultCh)

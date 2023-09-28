@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/mr-chelyshkin/rpi4_network_controller/internal/controller"
-	"github.com/mr-chelyshkin/rpi4_network_controller/pkg/wifi"
 	"github.com/rivo/tview"
 )
 
@@ -18,70 +17,106 @@ type networkDetails struct {
 
 func cmdConnect(interrupt chan struct{}) {
 	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	go scanner(ctx, cancel)
 
 	go func() {
 		select {
+		case <-ctx.Done():
+			return
 		case <-interrupt:
 			cancel()
-		case <-ctx.Done():
+			return
 		}
 	}()
-	go scanner(ctx)
-	<-ctx.Done()
 }
 
-func scanner(ctx context.Context) {
+func scanner(ctx context.Context, cancel context.CancelFunc) {
+	networks := make(chan []networkDetails, 1)
+	defer close(networks)
+
 	output := make(chan string, 1)
 	defer close(output)
 
-	res := tview.NewList()
-	c := controller.New(output)
-	app.SetRoot(frameWrapper(ctx, res, output), true).SetFocus(res)
+	view := tview.NewList()
+	wifi := controller.New(output)
+	frameDraw(frameWrapper(ctx, view, output))
+	go func() {
+		for {
+			select {
+			case networks := <-networks:
+				view.Clear()
 
-	tick := func() {
-		networksCh := make(chan []networkDetails, 1)
-		defer close(networksCh)
-
-		go func() {
-			scan(ctx, networksCh, c.Scan)
-		}()
-		select {
-		case networks := <-networksCh:
-			for _, network := range networks {
-				res.AddItem(
-					network.title,
-					network.description,
-					'*',
-					network.form,
-				)
+				for _, network := range networks {
+					view.AddItem(
+						network.title,
+						network.description,
+						'*',
+						nil,
+					)
+				}
+			case <-ctx.Done():
+				return
 			}
-		case <-ctx.Done():
-			close(output)
-			res.Clear()
-			return
 		}
-	}
+	}()
 
-	app.QueueUpdateDraw(tick)
 	ticker := time.NewTicker(4 * time.Second)
 	defer ticker.Stop()
-
 	for {
 		select {
 		case <-ticker.C:
-			app.QueueUpdateDraw(tick)
+			scan(ctx, networks, wifi)
+			//app.QueueUpdateDraw(func() {
+			//	view.AddItem("ADDDDD", "AAAAAAAAAAAAA", '*', func() {})
+			//})
 		case <-ctx.Done():
-			close(output)
 			return
 		}
 	}
+
+	//	networksCh := make(chan []networkDetails, 1)
+	// defer close(networksCh)
+
+	//	go func() {
+	//		scan(ctx, networksCh, c)
+	//	}()
+	//	select {
+	//	case networks := <-networksCh:
+	//		for _, network := range networks {
+	//			res.AddItem(
+	//				network.title,
+	//				network.description,
+	//				'*',
+	//				network.form,
+	//			)
+	//		}
+	//	case <-ctx.Done():
+	// close(output)
+	//		res.Clear()
+	//		return
+	//	}
+	//}
+
+	// app.QueueUpdateDraw(tick)
+	// ticker := time.NewTicker(4 * time.Second)
+	// defer ticker.Stop()
+
+	//for {
+	//	select {
+	//	case <-ticker.C:
+	//		fmt.Print("SSSSFSF")
+	//		app.QueueUpdateDraw(func() {})
+	//	case <-ctx.Done():
+	//		close(output)
+	//		return
+	//	}
+	//}
 }
 
-func scan(ctx context.Context, n chan []networkDetails, sc func(ctx context.Context) []*wifi.Network) {
+func scan(ctx context.Context, n chan []networkDetails, sc *controller.Controller) {
 	networks := []networkDetails{}
 
-	for _, network := range sc(ctx) {
+	for _, network := range sc.Scan(ctx) {
 		network := network
 
 		description := fmt.Sprintf(
@@ -98,6 +133,7 @@ func scan(ctx context.Context, n chan []networkDetails, sc func(ctx context.Cont
 			},
 		)
 	}
+	fmt.Print("AAAAAAAAAAAAA")
 	n <- networks
 }
 

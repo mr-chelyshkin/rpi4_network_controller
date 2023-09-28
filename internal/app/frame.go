@@ -10,6 +10,10 @@ import (
 
 var app = tview.NewApplication()
 
+func frameDraw(frame *tview.Frame) {
+	app.SetRoot(frame, true).SetFocus(frame).Draw()
+}
+
 func frameWrapper(ctx context.Context, p tview.Primitive, o chan string) *tview.Frame {
 	writer := tview.NewTextView().
 		ScrollToEnd().

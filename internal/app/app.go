@@ -22,6 +22,7 @@ func Run() error {
 				app.SetRoot(frameWrapper(ctx, frame, nil), true).SetFocus(frame)
 				stop <- struct{}{}
 			case tcell.KeyCtrlC:
+				stop <- struct{}{}
 				app.Stop()
 			}
 			return event
