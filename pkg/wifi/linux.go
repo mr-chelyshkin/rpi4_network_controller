@@ -9,6 +9,10 @@ package wifi
 */
 import "C"
 
+import (
+	"unsafe"
+)
+
 //export goSendToChannel
 func goSendToChannel(s *C.char) {
 	outputChan <- C.GoString(s)
@@ -21,7 +25,7 @@ func networkStateCGO(output chan string) string {
 
 	C.redirect_output()
 	defer C.reset_output()
-	return C.GoString(C.current_connection())
+	return C.GoString(C.network_state())
 }
 
 func networkConnCGO(ssid, pass string, output chan string) bool {
