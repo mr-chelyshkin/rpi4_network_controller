@@ -6,6 +6,18 @@ import (
 	"strconv"
 )
 
+func State(output chan string) string {
+	return networkStateCGO(output)
+}
+
+func Conn(ssid, pass string, output chan string) bool {
+	return networkConnCGO(ssid, pass, output)
+}
+
+func Scan(output chan string) []*Network {
+	return networkScanCGO(output)
+}
+
 type Network struct {
 	sSID    [33]C.char
 	freq    float64
