@@ -1,4 +1,4 @@
-package controller
+package app
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/mr-chelyshkin/rpi4_network_controller"
-	"github.com/mr-chelyshkin/rpi4_network_controller/internal/wifi1"
+	"github.com/mr-chelyshkin/rpi4_network_controller/internal/controller"
 
 	"github.com/rivo/tview"
 )
@@ -28,9 +28,9 @@ func cmdConnect(ctx context.Context, stop chan struct{}) {
 
 func scanner(ctx context.Context, cancel context.CancelFunc) {
 	scanResults := tview.NewList()
-	controller := wifi1.NewWifi()
 	log := make(chan string, 1)
-
+	
+	controller := controller.New(log)
 	rpi4_network_controller.App.SetRoot(
 		frameDefault(ctx, scanResults, log),
 		true,

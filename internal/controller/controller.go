@@ -3,36 +3,75 @@ package controller
 import (
 	"context"
 
-	"github.com/mr-chelyshkin/rpi4_network_controller"
-
-	"github.com/gdamore/tcell/v2"
-	"github.com/rivo/tview"
+	"github.com/mr-chelyshkin/rpi4_network_controller/pkg/wifi"
 )
 
-func Run() error {
-	stop := make(chan struct{}, 1)
-	ctx := context.Background()
+type controller struct {
+	output chan string
+}
 
-	main := tview.NewList().
-		AddItem("Connect", "connect to wifi network", '1', func() { cmdConnect(ctx, stop) }).
-		AddItem("Disconnect", "interrupt wifi connection", '2', nil)
-	frameMain := frameDefault(ctx, main, nil)
+func New(output chan string) *controller {
+	return &controller{
+		output: output,
+	}
+}
 
-	rpi4_network_controller.App.SetInputCapture(
-		func(event *tcell.EventKey) *tcell.EventKey {
-			switch event.Key() {
-			case tcell.KeyESC:
-				rpi4_network_controller.App.SetRoot(frameMain, true)
-				stop <- struct{}{}
-			case tcell.KeyCtrlC:
-				rpi4_network_controller.App.Stop()
-			}
-			return event
-		},
-	)
-	return rpi4_network_controller.App.SetRoot(
-		frameMain, true,
-	).SetFocus(
-		frameMain,
-	).Run()
+// Scan ...
+func (c *controller) Scan(ctx context.Context) []*wifi.Network {
+	resultCh := make(chan []*wifi.Network, 1)
+
+	go func() {
+		defer close(resultCh)
+
+		go func() {
+			resultCh <- wifi.Scan(c.output)
+		}()
+		select {
+		case <-ctx.Done():
+			return
+		case result := <-resultCh:
+			resultCh <- result
+		}
+	}()
+	return <-resultCh
+}
+
+// Connect ...
+func (c *controller) Connect(ctx context.Context, ssid, password string) bool {
+	resultCh := make(chan bool, 1)
+
+	go func() {
+		defer close(resultCh)
+
+		go func() {
+			resultCh <- wifi.Conn(ssid, password, c.output)
+		}()
+		select {
+		case <-ctx.Done():
+			return
+		case result := <-resultCh:
+			resultCh <- result
+		}
+	}()
+	return <-resultCh
+}
+
+// Status ...
+func (c *controller) Status(ctx context.Context) string {
+	resultCh := make(chan string, 1)
+
+	go func() {
+		defer close(resultCh)
+
+		go func() {
+			resultCh <- wifi.State(c.output)
+		}()
+		select {
+		case <-ctx.Done():
+			return
+		case result := <-resultCh:
+			resultCh <- result
+		}
+	}()
+	return <-resultCh
 }
