@@ -4,31 +4,29 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/mr-chelyshkin/rpi4_network_controller"
-
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
-func frameDefault(ctx context.Context, obj tview.Primitive, log chan string) *tview.Frame {
-	logWriter := tview.NewTextView().
+var app = tview.NewApplication()
+
+func frameWrapper(ctx context.Context, p tview.Primitive, o chan string) *tview.Frame {
+	writer := tview.NewTextView().
 		ScrollToEnd().
 		SetDynamicColors(true).
-		SetChangedFunc(func() {
-			rpi4_network_controller.App.Draw()
-		})
+		SetChangedFunc(func() { app.Draw() })
 	grid := tview.NewGrid().
 		SetRows(-5, 1, 0).
 		SetBorders(true).
 		SetColumns(0)
-	grid.AddItem(obj, 0, 0, 1, 3, 0, 0, true)
-	grid.AddItem(logWriter, 2, 0, 1, 3, 0, 0, false)
+	grid.AddItem(p, 0, 0, 1, 3, 0, 0, true)
+	grid.AddItem(writer, 2, 0, 1, 3, 0, 0, false)
 
 	go func() {
 		for {
 			select {
-			case l := <-log:
-				fmt.Fprintf(logWriter, "%s\n", l)
+			case output := <-o:
+				_, _ = fmt.Fprintf(writer, "%s\n", output)
 			case <-ctx.Done():
 				return
 			}

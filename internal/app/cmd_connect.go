@@ -10,25 +10,67 @@ import (
 	"github.com/rivo/tview"
 )
 
-func cmdConnect(ctx context.Context) {
-	scanner(ctx)
+type networkDetails struct {
+	description string
+	form        func()
+	title       string
+}
+
+func cmdConnect(interrupt chan struct{}) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	go func() {
+		select {
+		case <-interrupt:
+			cancel()
+		case <-ctx.Done():
+		}
+	}()
+	go scanner(ctx)
+	<-ctx.Done()
 }
 
 func scanner(ctx context.Context) {
 	output := make(chan string, 1)
-	frame := tview.NewList()
+	defer close(output)
 
+	res := tview.NewList()
 	c := controller.New(output)
-	app.SetRoot(frame, true)
+	app.SetRoot(frameWrapper(ctx, res, output), true).SetFocus(res)
 
-	output <- "Some log example"
+	tick := func() {
+		networksCh := make(chan []networkDetails, 1)
+		defer close(networksCh)
 
+		go func() {
+			scan(ctx, networksCh, c.Scan)
+		}()
+		select {
+		case networks := <-networksCh:
+			for _, network := range networks {
+				res.AddItem(
+					network.title,
+					network.description,
+					'*',
+					network.form,
+				)
+			}
+		case <-ctx.Done():
+			close(output)
+			res.Clear()
+			return
+		}
+	}
+
+	app.QueueUpdateDraw(tick)
 	ticker := time.NewTicker(4 * time.Second)
 	defer ticker.Stop()
+
 	for {
 		select {
 		case <-ticker.C:
-			app.QueueUpdateDraw(func() { scan(ctx, c.Scan, frame) })
+			app.QueueUpdateDraw(tick)
 		case <-ctx.Done():
 			close(output)
 			return
@@ -36,55 +78,75 @@ func scanner(ctx context.Context) {
 	}
 }
 
-func scan(ctx context.Context, sc func(ctx context.Context) []*wifi.Network, fr *tview.List) {
-	type networkDetails struct {
-		description string
-		form        func()
-		title       string
-	}
+func scan(ctx context.Context, n chan []networkDetails, sc func(ctx context.Context) []*wifi.Network) {
 	networks := []networkDetails{}
-	refresh := make(chan struct{}, 1)
 
-	go func() {
-		for _, network := range sc(ctx) {
-			network := network
+	for _, network := range sc(ctx) {
+		network := network
 
-			description := fmt.Sprintf(
-				"Freq: %s | Level: %s | Quality: %s",
-				network.GetFreq(),
-				network.GetLevel(),
-				network.GetQuality(),
-			)
-			networks = append(
-				networks,
-				networkDetails{
-					description: description,
-					title:       network.GetSSID(),
-				},
-			)
-		}
-		refresh <- struct{}{}
-	}()
-	go func() {
-		for {
-			select {
-			case <-refresh:
-				fr.Clear()
-
-				for _, network := range networks {
-					fr.AddItem(
-						network.title,
-						network.description,
-						'*',
-						network.form,
-					)
-				}
-			case <-ctx.Done():
-				return
-			}
-		}
-	}()
+		description := fmt.Sprintf(
+			"Freq: %s | Level: %s | Quality: %s",
+			network.GetFreq(),
+			network.GetLevel(),
+			network.GetQuality(),
+		)
+		networks = append(
+			networks,
+			networkDetails{
+				description: description,
+				title:       network.GetSSID(),
+			},
+		)
+	}
+	n <- networks
 }
+
+//
+//func scan(ctx context.Context, sc func(ctx context.Context) []*wifi.Network, fr *tview.List) {
+//
+//	networks := []networkDetails{}
+//	refresh := make(chan struct{}, 1)
+//
+//	go func() {
+//		for _, network := range sc(ctx) {
+//			network := network
+//
+//			description := fmt.Sprintf(
+//				"Freq: %s | Level: %s | Quality: %s",
+//				network.GetFreq(),
+//				network.GetLevel(),
+//				network.GetQuality(),
+//			)
+//			networks = append(
+//				networks,
+//				networkDetails{
+//					description: description,
+//					title:       network.GetSSID(),
+//				},
+//			)
+//		}
+//		refresh <- struct{}{}
+//	}()
+//	go func() {
+//		for {
+//			select {
+//			case <-refresh:
+//				fr.Clear()
+//
+//				for _, network := range networks {
+//					fr.AddItem(
+//						network.title,
+//						network.description,
+//						'*',
+//						network.form,
+//					)
+//				}
+//			case <-ctx.Done():
+//				return
+//			}
+//		}
+//	}()
+//}
 
 //func scan(
 //	ctx context.Context,
