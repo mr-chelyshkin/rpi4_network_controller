@@ -7,6 +7,12 @@ import (
 	"github.com/rivo/tview"
 )
 
+type cmdConnectNetworkDetails struct {
+	form     func()
+	subTitle string
+	title    string
+}
+
 // Run application.
 func Run() error {
 	stop := make(chan struct{}, 1)
