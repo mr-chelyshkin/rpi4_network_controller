@@ -13,7 +13,7 @@ import (
 
 func cmdConnect(interrupt chan struct{}) {
 	ctx, cancel := context.WithCancel(context.Background())
-	go scanner(ctx)
+	go scanner(ctx, cancel)
 
 	go func() {
 		select {
@@ -26,7 +26,7 @@ func cmdConnect(interrupt chan struct{}) {
 	}()
 }
 
-func scanner(ctx context.Context) {
+func scanner(ctx context.Context, cancel context.CancelFunc) {
 	networks := make(chan []cmdConnectNetworkDetails, 1)
 	defer close(networks)
 
@@ -60,14 +60,14 @@ func scanner(ctx context.Context) {
 			}
 		}
 	}()
-	scan(ctx, output, wifi, networks)
+	scan(ctx, cancel, output, wifi, networks)
 
 	ticker := time.NewTicker(4 * time.Second)
 	defer ticker.Stop()
 	for {
 		select {
 		case <-ticker.C:
-			scan(ctx, output, wifi, networks)
+			scan(ctx, cancel, output, wifi, networks)
 		case <-ctx.Done():
 			return
 		}
@@ -76,6 +76,7 @@ func scanner(ctx context.Context) {
 
 func scan(
 	ctx context.Context,
+	cancel context.CancelFunc,
 	output chan string,
 	wifi *controller.Controller,
 	data chan []cmdConnectNetworkDetails,
@@ -96,7 +97,10 @@ func scan(
 			cmdConnectNetworkDetails{
 				subTitle: description,
 				title:    network.GetSSID(),
-				form:     func() { connForm(network, wifi) },
+				form: func() {
+					cancel()
+					connForm(network, wifi)
+				},
 			},
 		)
 	}
