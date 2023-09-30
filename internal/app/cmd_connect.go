@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/mr-chelyshkin/rpi4_network_controller/internal/controller"
@@ -134,12 +133,6 @@ func conn(
 	password string,
 ) {
 	output <- fmt.Sprintf("try connect to %s\n", network.GetSSID())
-	ok := wifi.Connect(ctx, output, network.GetSSID(), password)
+	_ = wifi.Connect(ctx, output, network.GetSSID(), password)
 	output <- wifi.Status(ctx, output)
-
-	if ok {
-		output <- "exit..."
-		time.Sleep(2 * time.Second)
-		os.Exit(0)
-	}
 }
