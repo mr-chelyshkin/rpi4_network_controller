@@ -32,7 +32,7 @@ func frameWrapper(ctx context.Context, p tview.Primitive, o chan string) *tview.
 		SetBorders(true).
 		SetColumns(0)
 	grid.AddItem(p, 0, 0, 1, 3, 0, 0, true)
-	grid.AddItem(writer, 2, 0, 1, 3, 0, 0, false)
+	grid.AddItem(writer, 2, 0, 2, 3, 0, 0, false)
 
 	go func() {
 		for {

@@ -93,11 +93,12 @@ func scan(
 		)
 		networks = append(
 			networks,
-
 			cmdConnectNetworkDetails{
 				subTitle: description,
 				title:    network.GetSSID(),
-				form:     func() { connForm(network, wifi) },
+				form: func() {
+					connForm(network, wifi)
+				},
 			},
 		)
 	}
@@ -114,7 +115,7 @@ func connForm(network *wifi.Network, wifi *controller.Controller) {
 	form.AddButton(
 		"Connect",
 		func() {
-			conn(
+			go conn(
 				ctx,
 				output,
 				network,
