@@ -7,23 +7,19 @@ import (
 )
 
 // Controller object.
-type Controller struct {
-	output chan string
-}
+type Controller struct{}
 
 // New return Controller object.
-func New(output chan string) *Controller {
-	return &Controller{
-		output: output,
-	}
+func New() *Controller {
+	return &Controller{}
 }
 
 // Scan scans for available networks and returns the result.
-func (c *Controller) Scan(ctx context.Context) []*wifi.Network {
+func (c *Controller) Scan(ctx context.Context, output chan string) []*wifi.Network {
 	resultCh := make(chan []*wifi.Network, 1)
 	go func() {
 		defer close(resultCh)
-		resultCh <- wifi.Scan(c.output)
+		resultCh <- wifi.Scan(output)
 	}()
 	select {
 	case <-ctx.Done():
@@ -34,11 +30,16 @@ func (c *Controller) Scan(ctx context.Context) []*wifi.Network {
 }
 
 // Connect tries to connect to a network and returns the result.
-func (c *Controller) Connect(ctx context.Context, ssid, password string) bool {
+func (c *Controller) Connect(ctx context.Context, output chan string, ssid, password string) bool {
 	resultCh := make(chan bool, 1)
 	go func() {
 		defer close(resultCh)
-		resultCh <- wifi.Conn(ssid, password, c.output)
+
+		if len(password) < 8 {
+			output <- "error: WiFi password should be 8 or more chars."
+			return
+		}
+		resultCh <- wifi.Conn(ssid, password, output)
 	}()
 	select {
 	case <-ctx.Done():
@@ -49,11 +50,11 @@ func (c *Controller) Connect(ctx context.Context, ssid, password string) bool {
 }
 
 // Status gets the wifi connection status.
-func (c *Controller) Status(ctx context.Context) string {
+func (c *Controller) Status(ctx context.Context, output chan string) string {
 	resultCh := make(chan string, 1)
 	go func() {
 		defer close(resultCh)
-		resultCh <- wifi.State(c.output)
+		resultCh <- wifi.State(output)
 	}()
 	select {
 	case <-ctx.Done():

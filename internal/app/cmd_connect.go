@@ -13,7 +13,7 @@ import (
 
 func cmdConnect(interrupt chan struct{}) {
 	ctx, cancel := context.WithCancel(context.Background())
-	go scanner(ctx, cancel)
+	go scanner(ctx)
 
 	go func() {
 		select {
@@ -26,7 +26,7 @@ func cmdConnect(interrupt chan struct{}) {
 	}()
 }
 
-func scanner(ctx context.Context, cancel context.CancelFunc) {
+func scanner(ctx context.Context) {
 	networks := make(chan []cmdConnectNetworkDetails, 1)
 	defer close(networks)
 
@@ -36,7 +36,7 @@ func scanner(ctx context.Context, cancel context.CancelFunc) {
 	output <- "start scanner: refresh every 4s."
 
 	view := tview.NewList()
-	wifi := controller.New(output)
+	wifi := controller.New()
 	frameDraw(frameWrapper(ctx, view, output))
 	go func() {
 		for {
@@ -46,13 +46,11 @@ func scanner(ctx context.Context, cancel context.CancelFunc) {
 					view.Clear()
 
 					for _, network := range networks {
-						view.AddItem(
-							network.title,
-							network.subTitle,
-							'*',
+						network := network
+						view.AddItem(network.title, network.subTitle, '*',
 							func() {
 								output <- "stop scanner."
-								cancel()
+								network.form()
 							},
 						)
 					}
@@ -62,14 +60,14 @@ func scanner(ctx context.Context, cancel context.CancelFunc) {
 			}
 		}
 	}()
-	scan(ctx, wifi, networks)
+	scan(ctx, output, wifi, networks)
 
 	ticker := time.NewTicker(4 * time.Second)
 	defer ticker.Stop()
 	for {
 		select {
 		case <-ticker.C:
-			scan(ctx, wifi, networks)
+			scan(ctx, output, wifi, networks)
 		case <-ctx.Done():
 			return
 		}
@@ -78,12 +76,13 @@ func scanner(ctx context.Context, cancel context.CancelFunc) {
 
 func scan(
 	ctx context.Context,
+	output chan string,
 	wifi *controller.Controller,
 	data chan []cmdConnectNetworkDetails,
 ) {
 	networks := []cmdConnectNetworkDetails{}
 
-	for _, network := range wifi.Scan(ctx) {
+	for _, network := range wifi.Scan(ctx, output) {
 		network := network
 
 		description := fmt.Sprintf(
@@ -124,7 +123,7 @@ func connForm(network *wifi.Network, wifi *controller.Controller) {
 			)
 		},
 	)
-	frameDraw(frameWrapper(ctx, form, output))
+	setFrame(frameWrapper(ctx, form, output))
 }
 
 func conn(
@@ -135,11 +134,6 @@ func conn(
 	password string,
 ) {
 	output <- fmt.Sprintf("try connect to %s\n", network.GetSSID())
-	if len(password) < 8 {
-		output <- "error: WiFi password should be 8 or more chars."
-		return
-	}
-
-	_ = wifi.Connect(ctx, network.GetSSID(), password)
-	output <- wifi.Status(ctx)
+	_ = wifi.Connect(ctx, output, network.GetSSID(), password)
+	output <- wifi.Status(ctx, output)
 }
