@@ -22,11 +22,17 @@ var outputChan chan string
 
 func networkStateCGO(output chan string) string {
 	outputChan = output
+
+	C.reset_output()
+	defer C.reset_output()
 	return C.GoString(C.network_state())
 }
 
 func networkConnCGO(ssid, pass string, output chan string) bool {
 	outputChan = output
+
+	C.redirect_output()
+	defer C.reset_output()
 	return C.network_conn(C.CString(ssid), C.CString(pass)) == 0
 }
 
@@ -36,6 +42,9 @@ func networkScanCGO(output chan string) []*Network {
 	count := C.int(0)
 	results := C.network_scan(&count)
 	networks := make([]*Network, count)
+
+	C.redirect_output()
+	defer C.reset_output()
 
 	for i := 0; i < int(count); i++ {
 		n := (*Network)(
