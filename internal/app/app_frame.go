@@ -38,7 +38,9 @@ func frameWrapper(ctx context.Context, p tview.Primitive, o chan string) *tview.
 		for {
 			select {
 			case output := <-o:
-				_, _ = fmt.Fprintf(writer, "%s\n", output)
+				app.QueueUpdateDraw(func() {
+					_, _ = fmt.Fprintf(writer, "%s\n", output)
+				})
 			case <-ctx.Done():
 				return
 			}

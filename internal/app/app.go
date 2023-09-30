@@ -2,6 +2,9 @@ package app
 
 import (
 	"context"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -15,8 +18,22 @@ type cmdConnectNetworkDetails struct {
 
 // Run application.
 func Run() error {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	stop := make(chan struct{}, 1)
-	ctx := context.Background()
+	defer close(stop)
+	sign := make(chan os.Signal, 1)
+	signal.Notify(sign, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		select {
+		case <-sign:
+			cancel()
+		case <-stop:
+			cancel()
+		}
+	}()
 
 	frame := tview.NewList().
 		AddItem("Connect", "connect to wifi network", '1', func() { cmdConnect(stop) }).
