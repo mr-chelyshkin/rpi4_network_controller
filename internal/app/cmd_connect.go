@@ -36,7 +36,7 @@ func scanner(ctx context.Context, cancel context.CancelFunc) {
 	output <- "start scanner: refresh every 4s."
 
 	view := tview.NewList()
-	wifi := controller.New()
+	wifi := controller.New(controller.WithScanSkipEmptySSIDs())
 	frameDraw(frameWrapper(ctx, view, output))
 	go func() {
 		for {

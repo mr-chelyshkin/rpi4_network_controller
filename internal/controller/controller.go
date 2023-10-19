@@ -7,11 +7,17 @@ import (
 )
 
 // Controller object.
-type Controller struct{}
+type Controller struct {
+	scanSkipEmptySsid bool
+}
 
 // New return Controller object.
-func New() Controller {
-	return Controller{}
+func New(opts ...ControllerOpts) Controller {
+	c := &Controller{}
+	for _, opt := range opts {
+		opt(c)
+	}
+	return *c
 }
 
 // Scan scans for available networks and returns the result.
@@ -19,7 +25,19 @@ func (c Controller) Scan(ctx context.Context, output chan string) []*wifi.Networ
 	resultCh := make(chan []*wifi.Network, 1)
 	go func() {
 		defer close(resultCh)
-		resultCh <- wifi.Scan(output)
+
+		resultCh <- func() []*wifi.Network {
+			networks := []*wifi.Network{}
+			defer func() { networks = nil }()
+
+			for _, network := range wifi.Scan(output) {
+				if c.scanSkipEmptySsid && len(network.GetSSID()) == 0 {
+					continue
+				}
+				networks = append(networks, network)
+			}
+			return networks
+		}()
 	}()
 	select {
 	case <-ctx.Done():

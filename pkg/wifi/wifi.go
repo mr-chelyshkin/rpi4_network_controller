@@ -37,7 +37,7 @@ func (a byLevelDesc) Less(i, j int) bool { return a[i].level > a[j].level }
 
 // GetSSID return network ssid.
 func (n Network) GetSSID() string {
-	return C.GoStringN(&n.sSID[0], 32)
+	return C.GoString(&n.sSID[0])
 }
 
 // GetFreq return network freq.
