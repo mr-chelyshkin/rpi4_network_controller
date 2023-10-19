@@ -78,7 +78,7 @@ func scan(
 	ctx context.Context,
 	cancel context.CancelFunc,
 	output chan string,
-	wifi *controller.Controller,
+	wifi controller.Controller,
 	data chan []cmdConnectNetworkDetails,
 ) {
 	networks := []cmdConnectNetworkDetails{}
@@ -107,7 +107,7 @@ func scan(
 	data <- networks
 }
 
-func connForm(network *wifi.Network, wifi *controller.Controller) {
+func connForm(network *wifi.Network, wifi controller.Controller) {
 	ctx := context.Background()
 	output := make(chan string, 1)
 
@@ -133,7 +133,7 @@ func conn(
 	ctx context.Context,
 	output chan string,
 	network *wifi.Network,
-	wifi *controller.Controller,
+	wifi controller.Controller,
 	password string,
 ) {
 	output <- fmt.Sprintf("try connect to %s\n", network.GetSSID())

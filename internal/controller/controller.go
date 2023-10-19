@@ -10,12 +10,12 @@ import (
 type Controller struct{}
 
 // New return Controller object.
-func New() *Controller {
-	return &Controller{}
+func New() Controller {
+	return Controller{}
 }
 
 // Scan scans for available networks and returns the result.
-func (c *Controller) Scan(ctx context.Context, output chan string) []*wifi.Network {
+func (c Controller) Scan(ctx context.Context, output chan string) []*wifi.Network {
 	resultCh := make(chan []*wifi.Network, 1)
 	go func() {
 		defer close(resultCh)
@@ -30,12 +30,12 @@ func (c *Controller) Scan(ctx context.Context, output chan string) []*wifi.Netwo
 }
 
 // Connect tries to connect to a network and returns the result.
-func (c *Controller) Connect(ctx context.Context, output chan string, ssid, password string) bool {
+func (c Controller) Connect(ctx context.Context, output chan string, ssid, password string) bool {
 	resultCh := make(chan bool, 1)
 	go func() {
 		defer close(resultCh)
 
-		if len(password) < 8 {
+		if len(password) != 0 && len(password) < 8 {
 			output <- "error: WiFi password should be 8 or more chars."
 			return
 		}
@@ -50,7 +50,7 @@ func (c *Controller) Connect(ctx context.Context, output chan string, ssid, pass
 }
 
 // Status gets the wifi connection status.
-func (c *Controller) Status(ctx context.Context, output chan string) string {
+func (c Controller) Status(ctx context.Context, output chan string) string {
 	resultCh := make(chan string, 1)
 	go func() {
 		defer close(resultCh)
