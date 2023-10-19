@@ -14,15 +14,12 @@ func Conn(ssid, pass string, output chan string) bool {
 	return networkConnCGO(ssid, pass, output)
 }
 
+type ScanOpts struct {
+	SkipEmptySsid bool
+}
+
 func Scan(output chan string) []*Network {
-	networks := []*Network{}
-	for _, network := range networkScanCGO(output) {
-		if C.GoString(&network.sSID[0]) == "" {
-			continue
-		}
-		networks = append(networks, network)
-	}
-	return networks // networkScanCGO(output)
+	return networkScanCGO(output)
 }
 
 type Network struct {
