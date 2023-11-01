@@ -20,9 +20,10 @@ typedef struct wifi_info {
  *
  * @param ssid SSID of the network.
  * @param password Password of the network.
+ * @param country Country code of the network. 
  * @return A result code indicating success or failure.
  */
-int network_conn(const char* ssid, const char* password);
+int network_conn(const char* ssid, const char* password, const char* country);
 
 /**
  * Scan for available WiFi networks.

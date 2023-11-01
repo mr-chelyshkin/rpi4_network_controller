@@ -6,7 +6,7 @@ func networkStateCGO(output chan string) string {
 	return ""
 }
 
-func networkConnCGO(ssid, pass string, output chan string) bool {
+func networkConnCGO(ssid, pass, country string, output chan string) bool {
 	return false
 }
 

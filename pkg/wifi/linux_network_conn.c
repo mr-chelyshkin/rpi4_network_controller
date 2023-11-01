@@ -28,8 +28,8 @@ int execute_command(const char *command, char *const args[]) {
     return WEXITSTATUS(status) == 0 ? 0 : -1;
 }
 
-// Function to connect to a WiFi network given the SSID and password.
-int network_conn(const char* ssid, const char* password) {
+// Function to connect to a WiFi network given the SSID, password, country.
+int network_conn(const char* ssid, const char* password, const char* country) {
     goSendToChannel("Starting WiFi connection");
 
     char *killargs[] = {"killall", "wpa_supplicant", NULL};
@@ -55,11 +55,11 @@ int network_conn(const char* ssid, const char* password) {
     fprintf(config_file,
             "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\n"
             "update_config=1\n"
-            "country=US\n\n"
+            "country=%s\n\n"
             "network={\n"
             "\tssid=\"%s\"\n"
             "\tpsk=\"%s\"\n"
-            "}\n", ssid, password);
+            "}\n", country, ssid, password);
     fclose(config_file);
 
     goSendToChannel("Starting wpa_supplicant with the created configuration");

@@ -10,8 +10,8 @@ func State(output chan string) string {
 	return networkStateCGO(output)
 }
 
-func Conn(ssid, pass string, output chan string) bool {
-	return networkConnCGO(ssid, pass, output)
+func Conn(ssid, pass, country string, output chan string) bool {
+	return networkConnCGO(ssid, pass, country, output)
 }
 
 type ScanOpts struct {

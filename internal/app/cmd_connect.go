@@ -116,6 +116,7 @@ func connForm(network wifi.Network, wifi controller.Controller) {
 
 	form := tview.NewForm().
 		AddInputField("SSID", network.GetSSID(), 40, nil, nil).
+		AddInputField("Country code", "US", 40, nil, nil).
 		AddPasswordField("Password", "", 40, '*', nil)
 	form.AddButton(
 		"Connect",
@@ -123,9 +124,10 @@ func connForm(network wifi.Network, wifi controller.Controller) {
 			go conn(
 				ctx,
 				output,
-				network,
 				wifi,
+				form.GetFormItem(0).(*tview.InputField).GetText(),
 				form.GetFormItem(1).(*tview.InputField).GetText(),
+				form.GetFormItem(2).(*tview.InputField).GetText(),
 			)
 		},
 	)
@@ -135,11 +137,12 @@ func connForm(network wifi.Network, wifi controller.Controller) {
 func conn(
 	ctx context.Context,
 	output chan string,
-	network wifi.Network,
 	wifi controller.Controller,
-	password string,
+	ssid,
+	country,
+	pass string,
 ) {
-	output <- fmt.Sprintf("try connect to %s\n", network.GetSSID())
-	_ = wifi.Connect(ctx, output, network.GetSSID(), password)
+	output <- fmt.Sprintf("try connect to %s\n", ssid)
+	_ = wifi.Connect(ctx, output, ssid, pass, country)
 	output <- wifi.Status(ctx, output)
 }

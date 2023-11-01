@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"sort"
+	"strings"
 
 	"github.com/mr-chelyshkin/rpi4_network_controller/pkg/wifi"
 )
@@ -58,16 +59,19 @@ func (c Controller) Scan(ctx context.Context, output chan string) []wifi.Network
 }
 
 // Connect tries to connect to a network and returns the result.
-func (c Controller) Connect(ctx context.Context, output chan string, ssid, password string) bool {
+func (c Controller) Connect(ctx context.Context, output chan string, ssid, pass, country string) bool {
 	resultCh := make(chan bool, 1)
 	go func() {
 		defer close(resultCh)
 
-		if len(password) != 0 && len(password) < 8 {
+		if len(pass) != 0 && len(pass) < 8 {
 			output <- "error: WiFi password should be 8 or more chars."
 			return
 		}
-		resultCh <- wifi.Conn(ssid, password, output)
+		if len(country) == 0 {
+			country = "US"
+		}
+		resultCh <- wifi.Conn(ssid, pass, strings.ToUpper(country), output)
 	}()
 	select {
 	case <-ctx.Done():
