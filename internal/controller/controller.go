@@ -2,13 +2,16 @@ package controller
 
 import (
 	"context"
+	"sort"
 
 	"github.com/mr-chelyshkin/rpi4_network_controller/pkg/wifi"
 )
 
 // Controller object.
 type Controller struct {
-	scanSkipEmptySsid bool
+	scanSkipEmptySsid   bool
+	scanSortBySignalLvl bool
+	scanSortBySsidName  bool
 }
 
 // New return Controller object.
@@ -20,21 +23,28 @@ func New(opts ...ControllerOpts) Controller {
 	return *c
 }
 
-// Scan scans for available networks and returns the result.
-func (c Controller) Scan(ctx context.Context, output chan string) []*wifi.Network {
-	resultCh := make(chan []*wifi.Network, 1)
+// Scan available networks and returns the result.
+func (c Controller) Scan(ctx context.Context, output chan string) []wifi.Network {
+	resultCh := make(chan []wifi.Network, 1)
 	go func() {
 		defer close(resultCh)
 
-		resultCh <- func() []*wifi.Network {
-			networks := []*wifi.Network{}
+		resultCh <- func() []wifi.Network {
+			networks := []wifi.Network{}
 			defer func() { networks = nil }()
 
 			for _, network := range wifi.Scan(output) {
 				if c.scanSkipEmptySsid && len(network.GetSSID()) == 0 {
 					continue
 				}
-				networks = append(networks, network)
+				networks = append(networks, *network)
+			}
+
+			switch {
+			case c.scanSortBySignalLvl:
+				sort.Sort(wifi.ByLevelDesc(networks))
+			case c.scanSortBySsidName:
+				sort.Sort(wifi.BySsidDesc(networks))
 			}
 			return networks
 		}()

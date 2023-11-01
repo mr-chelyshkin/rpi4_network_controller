@@ -36,7 +36,10 @@ func scanner(ctx context.Context, cancel context.CancelFunc) {
 	output <- "start scanner: refresh every 4s."
 
 	view := tview.NewList()
-	wifi := controller.New(controller.WithScanSkipEmptySSIDs())
+	wifi := controller.New(
+		controller.WithScanSkipEmptySSIDs(),
+		controller.WithScanSortByLevel(),
+	)
 	frameDraw(frameWrapper(ctx, view, output))
 	go func() {
 		for {
@@ -107,7 +110,7 @@ func scan(
 	data <- networks
 }
 
-func connForm(network *wifi.Network, wifi controller.Controller) {
+func connForm(network wifi.Network, wifi controller.Controller) {
 	ctx := context.Background()
 	output := make(chan string, 1)
 
@@ -132,7 +135,7 @@ func connForm(network *wifi.Network, wifi controller.Controller) {
 func conn(
 	ctx context.Context,
 	output chan string,
-	network *wifi.Network,
+	network wifi.Network,
 	wifi controller.Controller,
 	password string,
 ) {

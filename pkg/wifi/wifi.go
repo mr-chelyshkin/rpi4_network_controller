@@ -29,11 +29,17 @@ type Network struct {
 	level   int32
 }
 
-type byLevelDesc []Network
+type ByLevelDesc []Network
 
-func (a byLevelDesc) Len() int           { return len(a) }
-func (a byLevelDesc) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a byLevelDesc) Less(i, j int) bool { return a[i].level > a[j].level }
+func (a ByLevelDesc) Len() int           { return len(a) }
+func (a ByLevelDesc) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a ByLevelDesc) Less(i, j int) bool { return a[i].level > a[j].level }
+
+type BySsidDesc []Network
+
+func (a BySsidDesc) Len() int           { return len(a) }
+func (a BySsidDesc) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a BySsidDesc) Less(i, j int) bool { return C.GoString(&a[i].sSID[0]) > C.GoString(&a[j].sSID[0]) }
 
 // GetSSID return network ssid.
 func (n Network) GetSSID() string {
