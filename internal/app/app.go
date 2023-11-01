@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"os"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -34,6 +35,7 @@ func Run() error {
 			case tcell.KeyCtrlC:
 				stop <- struct{}{}
 				app.Stop()
+				os.Exit(0)
 			}
 			return event
 		},
