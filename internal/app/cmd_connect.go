@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"github.com/mr-chelyshkin/rpi4_network_controller/internal/ui"
 	"time"
 
 	"github.com/mr-chelyshkin/rpi4_network_controller/internal/controller"
@@ -40,12 +41,13 @@ func scanner(ctx context.Context, cancel context.CancelFunc) {
 		controller.WithScanSkipEmptySSIDs(),
 		controller.WithScanSortByLevel(),
 	)
-	frameDraw(frameWrapper(ctx, view, output))
+	//ui.Draw(frameWrapper(ctx, view, output))
+	ui.Draw(ctx, view)
 	go func() {
 		for {
 			select {
 			case networks := <-networks:
-				app.QueueUpdateDraw(func() {
+				ui.App.QueueUpdateDraw(func() {
 					view.Clear()
 
 					for _, network := range networks {
@@ -131,7 +133,8 @@ func connForm(network wifi.Network, wifi controller.Controller) {
 			)
 		},
 	)
-	setFrame(frameWrapper(ctx, form, output))
+	ui.Draw(ctx, form)
+	//ui.Draw(frameWrapper(ctx, form, output))
 }
 
 func conn(

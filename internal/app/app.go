@@ -2,6 +2,8 @@ package app
 
 import (
 	"context"
+	"github.com/mr-chelyshkin/rpi4_network_controller"
+	"github.com/mr-chelyshkin/rpi4_network_controller/internal/ui"
 	"os"
 
 	"github.com/gdamore/tcell/v2"
@@ -19,6 +21,13 @@ func Run() error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	//
+	values := map[string]string{
+		"key1": "value1",
+		"key2": "value2",
+	}
+	ctx = context.WithValue(ctx, rpi4_network_controller.CtxKeyHotkeys, values)
+
 	stop := make(chan struct{}, 1)
 	defer close(stop)
 
@@ -26,7 +35,7 @@ func Run() error {
 		AddItem("Connect", "connect to wifi network", '1', func() { cmdConnect(stop) }).
 		AddItem("Disconnect", "interrupt wifi connection", '2', func() {})
 
-	app.SetInputCapture(
+	ui.App.SetInputCapture(
 		func(event *tcell.EventKey) *tcell.EventKey {
 			switch event.Key() {
 			case tcell.KeyESC:
@@ -34,11 +43,11 @@ func Run() error {
 				Run()
 			case tcell.KeyCtrlC:
 				stop <- struct{}{}
-				app.Stop()
+				ui.App.Stop()
 				os.Exit(0)
 			}
 			return event
 		},
 	)
-	return appRun(frameWrapper(ctx, frame, nil))
+	return ui.Start(ctx, frame)
 }
