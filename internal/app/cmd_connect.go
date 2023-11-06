@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"github.com/mr-chelyshkin/rpi4_network_controller"
 	"github.com/mr-chelyshkin/rpi4_network_controller/internal/ui"
 	"time"
 
@@ -32,6 +33,7 @@ func scanner(ctx context.Context, cancel context.CancelFunc) {
 	defer close(networks)
 
 	output := make(chan string, 1)
+	ctx = context.WithValue(ctx, rpi4_network_controller.CtxKeyOutputCh, output)
 	defer close(output)
 
 	output <- "start scanner: refresh every 4s."

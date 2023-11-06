@@ -66,7 +66,11 @@ func FlexContent(p tview.Primitive) *tview.Flex {
 	return flex
 }
 
-func FlexWriter(ctx context.Context, output chan struct{}) *tview.Flex {
+func FlexWriter(ctx context.Context) *tview.Flex {
+	content, ok := ctx.Value(rpi4_network_controller.CtxKeyOutputCh).(chan string)
+	if !ok {
+		return tview.NewFlex()
+	}
 	frame := tview.NewTextView().
 		SetChangedFunc(func() { App.Draw() }).
 		SetDynamicColors(true).
@@ -78,7 +82,7 @@ func FlexWriter(ctx context.Context, output chan struct{}) *tview.Flex {
 	go func() {
 		for {
 			select {
-			case output := <-output:
+			case output := <-content:
 				App.QueueUpdateDraw(func() {
 					_, _ = fmt.Fprintf(frame, "%s\n", output)
 				})
@@ -87,7 +91,6 @@ func FlexWriter(ctx context.Context, output chan struct{}) *tview.Flex {
 			}
 		}
 	}()
-
 	flex.SetBorder(false)
 	return flex
 }
