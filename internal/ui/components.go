@@ -15,12 +15,14 @@ func ContentTable(ctx context.Context, data [][]string) *tview.Table {
 			content.SetCell(r, c, tview.NewTableCell(data[r][c]))
 		}
 	}
-	//content.Select(0, 0).SetFixed(1, 1).SetDoneFunc(func(key tcell.Key) {
-	//	content.SetSelectable(true, false)
-	//}).SetSelectedFunc(func(row int, column int) {
-	//	content.GetCell(row, column).SetTextColor(tcell.ColorRed)
-	//	content.SetSelectable(false, false)
-	//})
+
+	onEnter := func(row, column int) {
+		selectedData := data[row]
+		// Do something with the selectedData, like print it or pass to another function.
+		panic(selectedData)
+	}
+	content.SetSelectedFunc(onEnter)
+
 	return content
 }
 
