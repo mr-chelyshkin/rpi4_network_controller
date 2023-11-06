@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/gdamore/tcell/v2"
-	"github.com/rivo/tview"
 )
 
 type cmdConnectNetworkDetails struct {
@@ -31,9 +30,15 @@ func Run() error {
 	stop := make(chan struct{}, 1)
 	defer close(stop)
 
-	frame := tview.NewList().
-		AddItem("Connect", "connect to wifi network", '1', func() { cmdConnect(stop) }).
-		AddItem("Disconnect", "interrupt wifi connection", '2', func() {})
+	data := [][]string{
+		{"Connect", "connect to wifi network"},
+		{"Disconnect", "interrupt wifi connection"},
+	}
+	frame := ui.ContentTable(ctx, data)
+
+	//frame := tview.NewList().
+	//	AddItem("Connect", "connect to wifi network", '1', func() { cmdConnect(stop) }).
+	//	AddItem("Disconnect", "interrupt wifi connection", '2', func() {})
 
 	ui.App.SetInputCapture(
 		func(event *tcell.EventKey) *tcell.EventKey {

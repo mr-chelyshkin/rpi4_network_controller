@@ -8,7 +8,23 @@ import (
 	"github.com/rivo/tview"
 )
 
-func FlexHotKeys(ctx context.Context) *tview.Flex {
+func ContentTable(ctx context.Context, data [][]string) *tview.Table {
+	content := tview.NewTable().SetSelectable(true, false)
+	for r := 0; r < len(data); r++ {
+		for c := 0; c < len(data[r]); c++ {
+			content.SetCell(r, c, tview.NewTableCell(data[r][c]))
+		}
+	}
+	//content.Select(0, 0).SetFixed(1, 1).SetDoneFunc(func(key tcell.Key) {
+	//	content.SetSelectable(true, false)
+	//}).SetSelectedFunc(func(row int, column int) {
+	//	content.GetCell(row, column).SetTextColor(tcell.ColorRed)
+	//	content.SetSelectable(false, false)
+	//})
+	return content
+}
+
+func flexHotKeys(ctx context.Context) *tview.Flex {
 	frame := tview.NewTable()
 	content, ok := ctx.Value(rpi4_network_controller.CtxKeyHotkeys).(map[string]string)
 	if ok {
@@ -27,7 +43,7 @@ func FlexHotKeys(ctx context.Context) *tview.Flex {
 	return flex
 }
 
-func FlexInfo(ctx context.Context) *tview.Flex {
+func flexInfo(ctx context.Context) *tview.Flex {
 	frame := tview.NewTable()
 	frame.SetCell(0, 0, tview.NewTableCell("Version:").SetTextColor(tcell.ColorYellow))
 	frame.SetCell(0, 1, tview.NewTableCell(rpi4_network_controller.Version).SetTextColor(tcell.ColorWhite))
@@ -57,7 +73,7 @@ func FlexInfo(ctx context.Context) *tview.Flex {
 	return flex
 }
 
-func FlexContent(p tview.Primitive) *tview.Flex {
+func flexContent(p tview.Primitive) *tview.Flex {
 	flex := tview.NewFlex().
 		SetDirection(tview.FlexRow).
 		AddItem(p, 0, 1, true)
@@ -66,7 +82,7 @@ func FlexContent(p tview.Primitive) *tview.Flex {
 	return flex
 }
 
-func FlexWriter(ctx context.Context) *tview.Flex {
+func flexWriter(ctx context.Context) *tview.Flex {
 	content, ok := ctx.Value(rpi4_network_controller.CtxKeyOutputCh).(chan string)
 	if !ok {
 		return tview.NewFlex()

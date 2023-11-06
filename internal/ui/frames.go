@@ -6,14 +6,14 @@ import (
 )
 
 func Frame(ctx context.Context, p tview.Primitive) *tview.Frame {
-	content := FlexContent(p)
+	content := flexContent(p)
 	header := tview.NewFlex().
 		SetDirection(tview.FlexColumn).
-		AddItem(FlexInfo(ctx), 0, 1, false).
-		AddItem(FlexHotKeys(ctx), 0, 2, false)
+		AddItem(flexInfo(ctx), 0, 1, false).
+		AddItem(flexHotKeys(ctx), 0, 2, false)
 	footer := tview.NewFlex().
 		SetDirection(tview.FlexColumn).
-		AddItem(FlexWriter(ctx), 0, 1, false)
+		AddItem(flexWriter(ctx), 0, 1, false)
 
 	frame := tview.NewFlex().
 		SetDirection(tview.FlexRow).
