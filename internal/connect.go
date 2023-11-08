@@ -34,7 +34,7 @@ func scanner(ctx context.Context, cancel context.CancelFunc) {
 
 	output <- "start scanner: refresh every 4s."
 	view := tview.NewList()
-	ui.Draw(ctx, view)
+	go ui.Draw(ctx, view)
 
 	go func() {
 		for {
