@@ -5,11 +5,12 @@ const (
 	ScanTickGlobal = 4
 	Version        = "0.0.1"
 
-	CtxKeyHotkeys  = "hotkeys"
-	CtxKeyCurConn  = "conn"
-	CtxKeyOutputCh = "output"
-	CtxKeyUserName = "username"
-	CtxKeyUserUid  = "useruid"
+	CtxKeyHotkeys        = "hotkeys"
+	CtxKeyCurConn        = "conn"
+	CtxKeyOutputCh       = "output"
+	CtxKeyUserName       = "username"
+	CtxKeyUserUid        = "useruid"
+	CtxKeyWifiController = "controller"
 )
 
 var (

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/mr-chelyshkin/rpi4_network_controller"
+	"github.com/mr-chelyshkin/rpi4_network_controller/internal/controller"
 )
 
 func UserInfo(ctx context.Context, c chan<- [2]string) {
@@ -20,6 +21,17 @@ func UserInfo(ctx context.Context, c chan<- [2]string) {
 			uid = u.Uid
 		}
 		c <- [2]string{usr, uid}
+	}
+	schedule(ctx, rpi4_network_controller.ScanTickGlobal, f)
+}
+
+func NetworkStatus(ctx context.Context, c chan<- string) {
+	f := func() {
+		wifi, ok := ctx.Value(rpi4_network_controller.CtxKeyWifiController).(controller.Controller)
+		if !ok {
+			return
+		}
+		c <- wifi.Status(ctx, nil)
 	}
 	schedule(ctx, rpi4_network_controller.ScanTickGlobal, f)
 }

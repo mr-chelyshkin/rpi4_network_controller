@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/mr-chelyshkin/rpi4_network_controller"
+	"github.com/mr-chelyshkin/rpi4_network_controller/internal/controller"
 	"github.com/mr-chelyshkin/rpi4_network_controller/internal/ui"
 
 	"github.com/gdamore/tcell/v2"
@@ -27,6 +28,11 @@ func Run() error {
 		"key2": "value2",
 	}
 	ctx = context.WithValue(ctx, rpi4_network_controller.CtxKeyHotkeys, values)
+	wifi := controller.New(
+		controller.WithScanSkipEmptySSIDs(),
+		controller.WithScanSortByLevel(),
+	)
+	ctx = context.WithValue(ctx, rpi4_network_controller.CtxKeyWifiController, wifi)
 
 	stop := make(chan struct{}, 1)
 	defer close(stop)
