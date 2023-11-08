@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/mr-chelyshkin/rpi4_network_controller"
-	"github.com/mr-chelyshkin/rpi4_network_controller/internal/app"
 	"os/user"
+
+	"github.com/mr-chelyshkin/rpi4_network_controller"
+	"github.com/mr-chelyshkin/rpi4_network_controller/internal"
 )
 
 func init() {
@@ -15,5 +16,5 @@ func init() {
 }
 
 func main() {
-	app.Run()
+	internal.Run()
 }

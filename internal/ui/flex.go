@@ -48,17 +48,34 @@ func writer(ctx context.Context) *tview.Flex {
 	return flex
 }
 
+type HotKeys struct {
+	Action      func(ctx context.Context)
+	Description string
+	Key         tcell.Key
+}
+
 func hotKeys(ctx context.Context) *tview.Flex {
 	frame := tview.NewTable()
-	content, ok := ctx.Value(rpi4_network_controller.CtxKeyHotkeys).(map[string]string)
+	content, ok := ctx.Value(rpi4_network_controller.CtxKeyHotkeys).([]HotKeys)
 	if ok {
 		row := 0
-		for k, v := range content {
-			frame.SetCell(row, 0, tview.NewTableCell("<"+k+">").SetTextColor(tcell.ColorBlue))
-			frame.SetCell(row, 1, tview.NewTableCell(v).SetTextColor(tcell.ColorGray))
+		for _, key := range content {
+			frame.SetCell(row, 0, tview.NewTableCell("<"+tcell.KeyNames[key.Key]+">").SetTextColor(tcell.ColorBlue))
+			frame.SetCell(row, 1, tview.NewTableCell(key.Description).SetTextColor(tcell.ColorGray))
 			row++
 		}
 	}
+	App.SetInputCapture(
+		func(event *tcell.EventKey) *tcell.EventKey {
+			for _, k := range content {
+				if k.Key == event.Key() {
+					k.Action(ctx)
+					break
+				}
+			}
+			return event
+		},
+	)
 	flex := tview.NewFlex().
 		SetDirection(tview.FlexRow).
 		AddItem(frame, 0, 1, false)
