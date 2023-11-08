@@ -3,26 +3,35 @@ package ui
 import (
 	"context"
 	"fmt"
+
 	"github.com/gdamore/tcell/v2"
 	"github.com/mr-chelyshkin/rpi4_network_controller"
 	"github.com/rivo/tview"
 )
 
-func ContentTable(ctx context.Context, data [][]string) *tview.Table {
+type ContentTableRow struct {
+	Action func(ctx context.Context)
+	Data   []string
+}
+
+type ContentTableData struct {
+	Headers []string
+	Data    []ContentTableRow
+}
+
+func ContentTable(ctx context.Context, data ContentTableData) *tview.Table {
 	content := tview.NewTable().SetSelectable(true, false)
-	for r := 0; r < len(data); r++ {
-		for c := 0; c < len(data[r]); c++ {
-			content.SetCell(r, c, tview.NewTableCell(data[r][c]))
+	for i, header := range data.Headers {
+		content.SetCell(0, i, tview.NewTableCell(header).SetAlign(tview.AlignCenter).SetSelectable(false))
+	}
+	for r, row := range data.Data {
+		for c, col := range row.Data {
+			content.SetCell(r+1, c, tview.NewTableCell(col))
 		}
 	}
-
-	onEnter := func(row, column int) {
-		selectedData := data[row]
-		// Do something with the selectedData, like print it or pass to another function.
-		panic(selectedData)
-	}
-	content.SetSelectedFunc(onEnter)
-
+	content.SetSelectedFunc(func(r, c int) {
+		data.Data[r-1].Action(ctx)
+	})
 	return content
 }
 

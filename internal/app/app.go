@@ -2,9 +2,10 @@ package app
 
 import (
 	"context"
+	"os"
+
 	"github.com/mr-chelyshkin/rpi4_network_controller"
 	"github.com/mr-chelyshkin/rpi4_network_controller/internal/ui"
-	"os"
 
 	"github.com/gdamore/tcell/v2"
 )
@@ -30,11 +31,27 @@ func Run() error {
 	stop := make(chan struct{}, 1)
 	defer close(stop)
 
-	data := [][]string{
-		{"Connect", "connect to wifi network"},
-		{"Disconnect", "interrupt wifi connection"},
-	}
-	frame := ui.ContentTable(ctx, data)
+	//data := [][]string{
+	//	{"Connect", "connect to wifi network"},
+	//	{"Disconnect", "interrupt wifi connection"},
+	//}
+	frame := ui.ContentTable(ctx, ui.ContentTableData{
+		Headers: []string{"one", "two"},
+		Data: []ui.ContentTableRow{
+			{
+				Action: func(ctx context.Context) {
+					panic("AAAAA 2")
+				},
+				Data: []string{"1", "2"},
+			},
+			{
+				Action: func(ctx context.Context) {
+					panic("AAAAA 1")
+				},
+				Data: []string{"1", "2"},
+			},
+		},
+	})
 
 	//frame := tview.NewList().
 	//	AddItem("Connect", "connect to wifi network", '1', func() { cmdConnect(stop) }).
