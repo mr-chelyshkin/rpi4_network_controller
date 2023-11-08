@@ -119,7 +119,7 @@ func info(ctx context.Context) *tview.Flex {
 					}
 				})
 			case <-ctx.Done():
-				close(usrInfoCh)
+				//close(usrInfoCh)
 				return
 			}
 		}

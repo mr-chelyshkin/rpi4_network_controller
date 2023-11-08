@@ -10,12 +10,6 @@ import (
 	"github.com/mr-chelyshkin/rpi4_network_controller/internal/ui"
 )
 
-type cmdConnectNetworkDetails struct {
-	form     func()
-	subTitle string
-	title    string
-}
-
 func Run() error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -50,10 +44,8 @@ func Run() error {
 		Headers: []string{"action", "description"},
 		Data: []ui.ContentTableRow{
 			{
-				Action: func(ctx context.Context) {
-					connect(stop)
-				},
-				Data: []string{"connect", "scan and connect to wifi network"},
+				Action: func(ctx context.Context) { go connect(ctx, stop) },
+				Data:   []string{"connect", "scan and connect to wifi network"},
 			},
 			{
 				Action: func(ctx context.Context) {},

@@ -3,9 +3,10 @@ package app
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/mr-chelyshkin/rpi4_network_controller"
 	"github.com/mr-chelyshkin/rpi4_network_controller/internal/ui"
-	"time"
 
 	"github.com/mr-chelyshkin/rpi4_network_controller/internal/controller"
 	"github.com/mr-chelyshkin/rpi4_network_controller/pkg/wifi"
