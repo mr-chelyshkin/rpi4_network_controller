@@ -49,10 +49,10 @@ func NetworkScan(ctx context.Context, c chan<- []map[string]string) {
 	}
 
 	f := func() {
+		ctx.Value(rpi4_network_controller.CtxKeyOutputCh).(chan string) <- "Run Tick"
 		var networks []map[string]string
 
 		for _, network := range wifi.Scan(ctx, output) {
-			network := network
 			networks = append(networks, map[string]string{
 				"ssid":    network.GetSSID(),
 				"quality": network.GetQuality(),
@@ -62,7 +62,7 @@ func NetworkScan(ctx context.Context, c chan<- []map[string]string) {
 		}
 		c <- networks
 	}
-	go schedule(ctx, 10, f)
+	go schedule(ctx, 4, f)
 }
 
 func schedule(ctx context.Context, tick int, f func()) {
