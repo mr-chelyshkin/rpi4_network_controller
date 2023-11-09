@@ -81,11 +81,12 @@ func (c Controller) Connect(ctx context.Context, output chan string, ssid, pass,
 	}
 }
 
-// Status gets the wifi connection status.
+// Status gets the WiFi connection status.
 func (c Controller) Status(ctx context.Context, output chan string) string {
 	resultCh := make(chan string, 1)
 	go func() {
 		defer close(resultCh)
+
 		resultCh <- wifi.State(output)
 	}()
 	select {

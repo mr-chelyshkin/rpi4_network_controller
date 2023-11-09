@@ -97,7 +97,7 @@ func info(ctx context.Context) *tview.Flex {
 
 	usrInfoCh := make(chan [2]string, 1)
 	go func() {
-		go schedule.UserInfo(ctx, usrInfoCh)
+		schedule.UserInfo(ctx, usrInfoCh)
 		for {
 			select {
 			case info := <-usrInfoCh:
@@ -126,7 +126,7 @@ func info(ctx context.Context) *tview.Flex {
 	}()
 	networkStatusCh := make(chan string, 1)
 	go func() {
-		go schedule.NetworkStatus(ctx, networkStatusCh)
+		schedule.NetworkStatus(ctx, networkStatusCh)
 		for {
 			select {
 			case info := <-networkStatusCh:

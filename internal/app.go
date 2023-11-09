@@ -10,6 +10,8 @@ import (
 	"github.com/mr-chelyshkin/rpi4_network_controller/internal/ui"
 )
 
+// Mutex on commend
+
 func Run() error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -17,13 +19,16 @@ func Run() error {
 	stop := make(chan struct{}, 1)
 	defer close(stop)
 
+	output := make(chan string, 1)
+	ctx = context.WithValue(ctx, rpi4_network_controller.CtxKeyOutputCh, output)
 	ctx = context.WithValue(ctx, rpi4_network_controller.CtxKeyHotkeys, []ui.HotKeys{
 		{
 			Key:         tcell.KeyESC,
 			Description: "Go to main menu",
 			Action: func(ctx context.Context) {
+				output <- "send interrupt"
 				stop <- struct{}{}
-				Run()
+				//Run()
 			},
 		},
 		{

@@ -19,6 +19,6 @@ func Main(ctx context.Context, p tview.Primitive) *tview.Frame {
 		SetDirection(tview.FlexRow).
 		AddItem(header, 6, 1, false).
 		AddItem(content, 0, 3, true).
-		AddItem(footer, 4, 2, false)
+		AddItem(footer, 16, 4, false)
 	return tview.NewFrame(frame)
 }

@@ -9,12 +9,15 @@ import (
 	"github.com/mr-chelyshkin/rpi4_network_controller/internal/controller"
 )
 
+// ADD: ctx withTimeout for jobs.
+
 func UserInfo(ctx context.Context, c chan<- [2]string) {
+	var (
+		uid = "error"
+		usr = "error"
+	)
+
 	f := func() {
-		var (
-			uid = "error"
-			usr = "error"
-		)
 		u, err := user.Current()
 		if err == nil {
 			usr = u.Username
@@ -22,30 +25,33 @@ func UserInfo(ctx context.Context, c chan<- [2]string) {
 		}
 		c <- [2]string{usr, uid}
 	}
-	schedule(ctx, rpi4_network_controller.ScanTickGlobal, f)
+	go schedule(ctx, rpi4_network_controller.ScanTickGlobal, f)
 }
 
 func NetworkStatus(ctx context.Context, c chan<- string) {
-	f := func() {
-		wifi, ok := ctx.Value(rpi4_network_controller.CtxKeyWifiController).(controller.Controller)
-		if !ok {
-			return
-		}
-		c <- wifi.Status(ctx, nil)
+	wifi, ok := ctx.Value(rpi4_network_controller.CtxKeyWifiController).(controller.Controller)
+	if !ok {
+		return
 	}
-	schedule(ctx, rpi4_network_controller.ScanTickGlobal, f)
+
+	f := func() { c <- wifi.Status(ctx, nil) }
+	go schedule(ctx, rpi4_network_controller.ScanTickGlobal, f)
 }
 
 func NetworkScan(ctx context.Context, c chan<- []map[string]string) {
+	wifi, ok := ctx.Value(rpi4_network_controller.CtxKeyWifiController).(controller.Controller)
+	if !ok {
+		return
+	}
+	output, ok := ctx.Value(rpi4_network_controller.CtxKeyOutputCh).(chan string)
+	if !ok {
+		return
+	}
+
 	f := func() {
-		wifi, ok := ctx.Value(rpi4_network_controller.CtxKeyWifiController).(controller.Controller)
-		if !ok {
-			return
-		}
-		output, _ := ctx.Value(rpi4_network_controller.CtxKeyOutputCh).(chan string)
 		var networks []map[string]string
-		s := wifi.Scan(ctx, output)
-		for _, network := range s {
+
+		for _, network := range wifi.Scan(ctx, output) {
 			network := network
 			networks = append(networks, map[string]string{
 				"ssid":    network.GetSSID(),
@@ -56,7 +62,7 @@ func NetworkScan(ctx context.Context, c chan<- []map[string]string) {
 		}
 		c <- networks
 	}
-	schedule(ctx, rpi4_network_controller.ScanTickGlobal, f)
+	go schedule(ctx, 10, f)
 }
 
 func schedule(ctx context.Context, tick int, f func()) {

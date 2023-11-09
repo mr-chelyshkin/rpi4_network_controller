@@ -19,6 +19,7 @@ type ScanOpts struct {
 }
 
 func Scan(output chan string) []*Network {
+	output <- "CGo"
 	return networkScanCGO(output)
 }
 

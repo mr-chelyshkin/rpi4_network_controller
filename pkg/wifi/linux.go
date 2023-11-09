@@ -40,7 +40,9 @@ func networkScanCGO(output chan string) []*Network {
 	outputChan = output
 
 	count := C.int(0)
+	output <- "run C code"
 	results := C.network_scan(&count)
+	output <- "got result C code"
 	networks := make([]*Network, count)
 
 	C.redirect_output()
