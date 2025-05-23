@@ -5,7 +5,7 @@
 > Pull Requests or issues are welcome
 
 This is a console tool for manage wireless network connection on Raspberry.
-
+# [project was moved](https://github.com/Mad-Pixels/wf)
 ### menu
 ![menu](https://github.com/mr-chelyshkin/rpi4_network_controller/blob/main/.img/main_menu.jpeg)
 
